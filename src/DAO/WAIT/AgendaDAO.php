@@ -1,9 +1,9 @@
 <?php
-
+/*
 namespace Modea\DAO;
 
 use Modea\Agenda;
-
+*/
 class NoteDAO extends DAO
 {
     /**
@@ -11,9 +11,39 @@ class NoteDAO extends DAO
      *
      * @return array A list of all notes.
      */
-    public function findInMonth($month) {
-        $sql = "select * from px_note order by art_id ";
-        $result = $this->getDb()->fetchAll($sql);
+    public function find() {
+	
+        // Etablissement de la connexion à MySQL
+        $mysql=new MySQL();
+        $Connexion=$mysql->getPDO();
+        // Préparation de la requête
+        $sql=$Connexion->prepare("SELECT * FROM agenda_note ORDER BY id");
+        try {
+            // On envoi la requête
+            $sql->execute();
+
+			// Convert query result to an array of domain objects
+			$entities = array();
+			foreach ($result as $row) {
+				$id = $row['user_id'];
+				$entities[$id] = $this->buildDomainObject($row);
+			}
+			return $entities;
+                
+
+        } 
+		catch( \Exception $e ){
+            $Log=new \Log(array(
+                "traitement"=>"User->getUserDB", 
+                "erreur"=>$e->getMessage(),
+                "requete"=>"select * from user where id=".$id
+            ));
+            $Log->Save();
+            return 'Erreur de requête : '.$e->getMessage();
+        }
+		// requête qui récupère les événements
+		$requete = "SELECT * FROM agenda_note ORDER BY id";
+        $result = $this->getDb()->fetchAll($requete);
 
         // Convert query result to an array of domain objects
         $notes = array();
@@ -49,29 +79,27 @@ class NoteDAO extends DAO
      */
     protected function buildDomainObject($row) {
         $note = new Note();
-        $note->setId($row['']);
-        $note->setMere_id($row['']);
-        $note->setUser_id($row['']);
-        $note->setCreat_id($row['']);
-        $note->setCreat_date($row['']);
-        $note->setModif_id($row['']);
-        $note->setModif_date($row['']);
-        $note->setLieu($row['']);
-        $note->setDetail($row['']);
-        $note->setDate_note($row['']);
-        $note->setH_debut($row['']);
-        $note->setH_fin($row['']);
-        $note->setDuree($row['']);
-        $note->setPers_concernee($row['']);
-        $note->setCouleur($row['']);
-        $note->setEmail($row['']);
-        $note->setContact_associe($row['']);
-        $note->setEmail_contact($row['']);
-        $note->setPartage($row['']);
-        $note->setDisponibilite($row['']);
-        $note->setRappel($row['']);
-        $note->setRappel_coef($row['']);
-        $note->setPeriodicite($row['']);
+        $note->setId($row['id']);
+        $note->setLibelle($row['libelle']);
+        $note->setStart($row['start']);
+        $note->setEnd($row['end']);
+        $note->setMere_id($row['mere_id']);
+        $note->setCreat_id($row['creat_id']);
+        $note->setCreat_date($row['creat_date']);
+        $note->setModif_id($row['modif_id']);
+        $note->setModif_date($row['modif_date']);
+        $note->setLieu($row['lieu']);
+        $note->setDetail($row['detail']);
+        $note->setPers_concern($row['pers_concern']);
+        $note->setCouleur($row['couleur']);
+        $note->setEmail($row['email']);
+        $note->setContact_associe($row['contact_associe']);
+        $note->setEmail_contact($row['email_contact']);
+        $note->setPartage($row['partage']);
+        $note->setDisponibilite($row['disponibilite']);
+        $note->setRappel($row['rappel']);
+        $note->setRappel_coef($row['rappel_coef']);
+        $note->setPeriodicite($row['periodicite']);
         return $note;
     }
 

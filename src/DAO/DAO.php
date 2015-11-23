@@ -2,33 +2,26 @@
 
 namespace Modea\DAO;
 
-//use Doctrine\DBAL\Connection;
-
 abstract class DAO 
 {
     /**
      * Database connection
      *
-     * @var Mysql
+     * @var Connection
      */
-    private $db;
+    private $connection;
 
     /**
      * Constructor
      *
      * @param \Doctrine\DBAL\Connection The database connection object
      */
-    public function __construct(Mysql $db) {
-        $this->db = $db;
-    }
 
-    /**
-     * Grants access to the database connection object
-     *
-     * @return \Doctrine\DBAL\Connection The database connection object
-     */
-    protected function getDb() {
-        return $this->db;
+    public function __construct(\PDO $connection = null)
+    {
+//        require '../../data/db-config.inc.php';
+ 		
+        $this->connection = $connection;
     }
 
     /**

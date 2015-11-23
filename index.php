@@ -97,7 +97,7 @@ include "../footer.php";
 				</div>
 				<div class="checkbox col-xs-7">
 					<label >
-						<input type="checkbox" class="checkbox" id="A_day">
+						<input type="checkbox" class="checkbox" id="allDay" onclick="affPlageHoraire(this.checked)">
 						Note couvrant toute la journée
 					</label>
 				</div>
@@ -105,11 +105,14 @@ include "../footer.php";
 		</div>
 		
 	<!--  HORAIRES   -->
-		<div class="form-group input-group-sm ">
+		<div class="form-group input-group-sm " >
 			<div class="col-xs-2">
 				<label for="A_date" class="control-label col-xs-12 col-sm-2">Horaires</label>
 			</div>
-			<div class="col-xs-10">
+			<div class="col-xs-10" id="plageHoraireFull" style="display:none;">
+				Toute la journée
+			</div>
+			<div class="col-xs-10" id="plageHoraire">
 				Débute à
 				<select class="form-control" id="NoteStartTime" name="NoteStartTime" onchange="ajustHeureFin();" style="display:inline; width:auto;">
 					<?php
@@ -206,7 +209,7 @@ include "../footer.php";
 	<!--  PARTAGE  -->
 		<div class="form-group">
 			<div class="col-xs-2">
-				<label for="A_date" class="control-label col-xs-12 col-sm-2">Partage</label>
+				<label class="control-label col-xs-12 col-sm-2">Partage</label>
 			</div>
 			<div class="radio col-xs-10">
 			  <label>
@@ -249,11 +252,11 @@ include "../footer.php";
 			<div class="col-xs-10">
 				<div class=" col-sm-5">
 					<select class="form-control" name="couleur" id="couleur">
-						<option>1</option>
-						<option>2</option>
-						<option>3</option>
-						<option>4</option>
-						<option>5</option>
+						<option value="1">bleu</option>
+						<option value="2">Vert</option>
+                                                <option value="3">Jaune</option>
+                                                <option value="4">Rose</option>
+                                                <option value="5">Rouge</option>
 					</select>
 				</div>
 				<div class="col-xs-offset-1 col-xs-4">
@@ -289,7 +292,7 @@ include "../footer.php";
 							</div>
 							<div class="input-group col-xs-6">
 								<div class="input-group-addon">Tous les</div>
-									<input type="text" class="form-control" name="repetionJours" id="repetionJours" value="1">
+									<input type="text" class="form-control" name="repetitionJours" id="repetitionJours" value="1" onfocus="document.getElementById('optionsRepetitionJour1').checked='true'">
 								<div class="input-group-addon">jour(s)</div>
 							</div>
 						</div>
@@ -297,7 +300,7 @@ include "../footer.php";
 							<div class="col-xs-1">
 								<input type="radio" name="optionsRepetitionJour" id="optionsRepetitionJour2" value="2">
 							</div>
-							<div class="col-xs-11">
+							<div class="col-xs-11" onclick="document.getElementById('optionsRepetitionJour2').checked='true'">
 								Tous les jours ouvrables (lundi à vendredi)
 							</div>
 						</div>
@@ -331,7 +334,7 @@ include "../footer.php";
 							<label for="optionsRepetitionMois1">
 								<input type="radio" name="optionsRepetitionMois" id="optionsRepetitionMois1" value="1" checked>
 								Le 
-								<select class="form-control" id="M_jourDuMois" name="M_jourDuMois" style="display:inline; width:auto;">
+								<select class="form-control" id="M_jourDuMois" name="M_jourDuMois" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRepetitionMois1').checked='true'">
 									<option selected="" value="1">1</option>
 									<?php
 									for($i=2; $i<=31; $i++){
@@ -346,14 +349,14 @@ include "../footer.php";
 							<label for="optionsRepetitionMois2">
 								<input type="radio" name="optionsRepetitionMois" id="optionsRepetitionMois2" value="2">
 								Le 
-								<select class="form-control" id="moisCardinalite" name="moisCardinalite" style="display:inline; width:auto;">
+								<select class="form-control" id="moisCardinalite" name="moisCardinalite" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRepetitionMois2').checked='true'">
 									<option selected="" value="1">1er</option>
 									<option value="2">2 ième</option>
 									<option value="3">3 ième</option>
 									<option value="4">4 ième</option>
 									<option value="5">Dernier</option>
 								</select>
-								<select class="form-control" id="moisCardinaliteJour" name="moisCardinaliteJour" style="display:inline; width:auto;">
+								<select class="form-control" id="moisCardinaliteJour" name="moisCardinaliteJour" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRepetitionMois2').checked='true'">
 									<option selected="" value="1">Lundi</option>
 									<option value="2">Mardi</option>
 									<option value="3">Mercredi</option>
@@ -372,7 +375,7 @@ include "../footer.php";
 							<label for="optionsRepetitionAn1">
 								<input type="radio" name="optionsRepetitionAn" id="optionsRepetitionAn1" value="1" checked>
 								Tous les
-								<select class="form-control" id="A_jourDuMois" name="A_jourDuMois" style="display:inline; width:auto;">
+								<select class="form-control" id="A_jourDuMois" name="A_jourDuMois" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRepetitionAn1').checked='true'">
 									<option selected="" value="1">1</option>
 									<?php
 									for($i=2; $i<=31; $i++){
@@ -380,7 +383,7 @@ include "../footer.php";
 									}
 									?>
 								</select>
-								<select class="form-control" id="A_Mois" name="A_Mois" style="display:inline; width:auto;">
+								<select class="form-control" id="A_Mois" name="A_Mois" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRepetitionAn1').checked='true'">
 									<option selected="" value="1">janvier</option>
 									<option value="2">Février</option>
 									<option value="3">Mars</option>
@@ -400,14 +403,14 @@ include "../footer.php";
 							<label for="optionsRepetitionAn2">
 								<input type="radio" name="optionsRepetitionAn" id="optionsRepetitionAn2" value="2">
 								Le 
-								<select class="form-control" id="anCardinalite" name="anCardinalite" style="display:inline; width:auto;">
+								<select class="form-control" id="anCardinalite" name="anCardinalite" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRepetitionAn2').checked='true'">
 									<option selected="" value="1">1er</option>
 									<option value="2">2 ième</option>
 									<option value="3">3 ième</option>
 									<option value="4">4 ième</option>
 									<option value="5">Dernier</option>
 								</select>
-								<select class="form-control" id="anCardinaliteJour" name="anCardinaliteJour" style="display:inline; width:auto;">
+								<select class="form-control" id="anCardinaliteJour" name="anCardinaliteJour" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRepetitionAn2').checked='true'">
 									<option selected="" value="1">Lundi</option>
 									<option value="2">Mardi</option>
 									<option value="3">Mercredi</option>
@@ -417,7 +420,7 @@ include "../footer.php";
 									<option value="7">Dimanche</option>
 								</select>
 								de
-								<select class="form-control" id="anCardinaliteMois" name="anCardinaliteMois" style="display:inline; width:auto;">
+								<select class="form-control" id="anCardinaliteMois" name="anCardinaliteMois" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRepetitionAn2').checked='true'">
 									<option selected="" value="1">janvier</option>
 									<option value="2">Février</option>
 									<option value="3">Mars</option>
@@ -450,7 +453,7 @@ include "../footer.php";
 							<label for="RepetitionOccurence2">
 								<input type="radio" id="RepetitionOccurence2" name="RepetitionOccurence" value="2" >
 									Fin le 
-								<input type="text" class="datepicker" id="RepetitionDateFin" name="RepetitionDateFin" placeholder="Date" style="width:100px;">
+								<input type="text" class="datepicker" id="RepetitionDateFin" name="RepetitionDateFin" placeholder="Date" style="width:100px;" onfocus="document.getElementById('RepetitionOccurence2').checked='true'">
 							</label>
 						</div>
 					</div>
@@ -468,39 +471,38 @@ include "../footer.php";
 			</div>
 			<div class="radio col-xs-10">
 				<div>
-					<input type="radio" name="optionsRappel" id="optionsRappel1" value="0" checked>
-					Pas de rappel
+					<label style="padding:0;"><input type="radio" name="optionsRappel" id="optionsRappel1" value="1" checked>
+					Pas de rappel</label>
 				</div>
 				<div >
-					<input type="radio" name="optionsRappel" id="optionsRappel2" value="1" >
-				 rappel
-
-				
-					
-						<select class="form-control" style="display:inline; width:auto;">
-							<option>1</option>
-							<option>2</option>
-							<option>3</option>
-							<option>4</option>
-							<option>5</option>
+					<label style="padding:0;">
+					<input type="radio" name="optionsRappel" id="optionsRappel2" value="2" >
+					rappel
+						<select class="form-control" id="tpsRappel" name="tpsRappel" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRappel2').checked='true'">
+						<?php 
+							for($i=1; $i<59; $i++){
+								$selected = ($i == 5) ? 'selected=""' : '' ;
+								echo '<option value="'.$i.'" '.$selected.'>'.$i.'</option>';
+							}
+						?>
 						</select>
-						<select class="form-control" style="display:inline; width:auto;">
-							<option>minute(s)</option>
-							<option>heure(s)</option>
-							<option>jour(s)</option>
+						<select class="form-control" id="rappel_coef" name="rappel_coef" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRappel2').checked='true'">
+							<option value="1">minute(s)</option>
+							<option value="60">heure(s)</option>
+							<option value="1440">jour(s)</option>
 						</select>
-					
 					avant.
+					</label>
 				</div>
 				<div>
 				<label class="checkbox-inline">
 					Copie par mail
 				</label>
 				<label class="checkbox-inline">
-					<input type="checkbox" id="inlineCheckbox1" value="option1"> Personne(s) concernée(s)
+					<input type="checkbox" id="ckEmail" value="option1"> Personne(s) concernée(s)
 				</label>
 				<label class="checkbox-inline">
-					<input type="checkbox" id="inlineCheckbox2" value="option2"> Contact associé
+					<input type="checkbox" id="ckEmailContact" value="option2"> Contact associé
 				</label>
 				</div>
 			</div>
@@ -533,7 +535,8 @@ include "../footer.php";
 <script src='../../assets/plugins/fullcalendar/lib/moment.min.js'></script>
 <script src='../../assets/plugins/fullcalendar/fullcalendar.min.js'></script>
 <script src='../../assets/plugins/fullcalendar/lang/fr.js'></script>
-<script src='./json/jquery.json-2.4.js'></script>
+<script src='./js/jquery.json-2.4.js'></script>
+<script src='./js/check.js'></script>
 <script>
 /* INITIALISE CALENDAR */
 	$(document).ready(function() {
@@ -578,6 +581,16 @@ include "../footer.php";
 				$(this).css('background-color', 'red');
 */				
 		//		$('#myModal').modal('show');
+
+			},
+			eventClick: function(calEvent, jsEvent, view) {
+
+				alert('Event: ' + calEvent.title);
+				alert('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
+				alert('View: ' + view.name);
+
+				// change the border color just for fun
+				$(this).css('border-color', 'red');
 
 			},
 //			height : 'auto',
@@ -646,10 +659,17 @@ include "../footer.php";
 			},
 			eventLimit: true, // allow "more" link when too many events
 			events: {
-				url: 'events.php',
+				url: 'events.php?user=<?php echo $_SESSION['id_user']; ?>',
+				type: 'GET',
+				data: {
+					custom_param1: 'something',
+					custom_param2: 'somethingelse'
+				},
 				error: function() {
 					$('#script-warning').show();
-				}
+				},
+	//			color: 'yellow',   // a non-ajax option
+	//			textColor: 'black' // a non-ajax option
 					
 			},
 			
@@ -672,6 +692,9 @@ include "../footer.php";
 /*  FIN INITIALISE CALENDAR  */
 	
 	function doSubmit(){
+		
+		if(!saisieOK()) {return; }
+		
 		$("#createEventModal").modal('hide');
 /*		console.log($('#NoteStartTime').val());   PEUT ETRE SUPPRIMER
 		console.log($('#NoteEndTime').val());
@@ -680,35 +703,33 @@ include "../footer.php";
 	*/	
 		var post_data = {};
 	
-		post_data['libelle'] = $('#NoteLibelle').val();
-        post_data['starttime'] = $('#NoteStartTime').val();
-		post_data['endtime'] = $('#NoteEndTime').val();
-//		post_data['allDay'] = ($('#NoteAllDay').val()'] == "false");
+		post_data['title'] = $('#NoteLibelle').val();
+		post_data['start'] = $('#NoteStartTime').val();
+		post_data['end'] = $('#NoteEndTime').val();
 		post_data['lieu'] = $('#lieu').val();
 		post_data['detail'] = $('#detail').val();
-		post_data['note_date'] = $('#A_date').val();
-		post_data['journee'] = check_box('A_day');								// chekbox
-		post_data['Hdebut'] = $('#NoteStartTime').val();
-		post_data['Hfin'] = $('#NoteEndTime').val();
+		post_data['A_date'] = $('#A_date').val();
+		post_data['allDay'] = check_box('allDay');								// chekbox
+//		post_data['allDay'] = ($('#NoteAllDay').val()'] == "false");
 		post_data['participants'] = check_select('zlParticipant');
-		post_data['partage'] = $('#optionsPartage').val();
-		post_data['dispo'] = $('#otionsDispo1').val();
-		post_data['couleur'] = $('#couleur').val();
+		post_data['partage'] = check('optionsPartage');
+                alert('partage : '+post_data['partage']);
+		post_data['dispo'] = check('optionsDispo');
+		post_data['color'] = $('#couleur').val();
 		
 		post_data['periodicite'] = $('#optionPeriodicite').val();				// select
 		
-		post_data['J_repetitionJours'] = $('#repetitionJours').val();			//
 		post_data['J_optionsRepetitionJour'] = check('optionsRepetitionJour');	// radio
-		post_data['J_repetionJours'] = $('#repetionJours').val();				//
+		post_data['J_repetitionJours'] = $('#repetitionJours').val();				//
 		
 		post_data['S_repetionSemaine'] = $('#repetionSemaine').val();			//
-		post_data['S_sem_lundi'] = $('#sem_lundi').val();						//
-		post_data['S_sem_mardi'] = $('#sem_mardi').val();						//
-		post_data['S_sem_mercredi'] = $('#sem_mercredi').val();					//
-		post_data['S_sem_jeudi'] = $('#sem_jeudi').val();						//
-		post_data['S_sem_vendredi'] = $('#sem_vendredi').val();
-		post_data['S_sem_samedi'] = $('#sem_samedi').val();
-		post_data['S_sem_dimanche'] = $('#sem_dimanche').val();
+		post_data['S_sem_1'] = $('#sem_lundi').val();						//
+		post_data['S_sem_2'] = $('#sem_mardi').val();						//
+		post_data['S_sem_3'] = $('#sem_mercredi').val();					//
+		post_data['S_sem_4'] = $('#sem_jeudi').val();						//
+		post_data['S_sem_5'] = $('#sem_vendredi').val();
+		post_data['S_sem_6'] = $('#sem_samedi').val();
+		post_data['S_sem_0'] = $('#sem_dimanche').val();
 		
 		post_data['M_repetionMois'] = $('#repetionMois').val();
 		post_data['M_optionsRepetitionMois'] = check('optionsRepetitionMois');		// radio
@@ -723,15 +744,22 @@ include "../footer.php";
 		post_data['A_anCardinaliteJour'] = $('#anCardinaliteJour').val();
 		post_data['A_anCardinaliteMois'] = $('#anCardinaliteMois').val();
 		
-		post_data['RepetitionOccurence'] = $('#RepetitionOccurence').val();
+		post_data['RepetitionOccurence'] = check('RepetitionOccurence');
 		post_data['Occurences'] = $('#Occurence').val();
 		post_data['RepetitionDateFin'] = $('#RepetitionDateFin').val();
+		
+		post_data['Rappel'] = check('optionsRappel');
+		post_data['tpsRappel'] = $('#tpsRappel').val();
+		post_data['rappel_coef'] = $('#rappel_coef').val();
+                
+		post_data['ckEmail'] = $('#ckEmail').val();
+		post_data['ckEmailContact'] = $('#ckEmailContact').val();
 		
 		var json = JSON.stringify(post_data);
 //alert(json);
 		$.ajax({
 			type: "POST",
-			url: "add_events.php",
+			url: "add_events.php?user=<?php echo $_SESSION['id_user']; ?>'",
 	//		dataType: "json",
 			data: {note: json},
 			success: function(json) {
@@ -749,11 +777,56 @@ include "../footer.php";
 			true);
 	}
 	
+	/*   ---------------------------------------  */
+    function saisieOK() {
+      if (trim($('#NoteLibelle').val()) == "") {
+        window.alert("Le libelle est obligatoire");
+        $('#NoteLibelle').focus();
+        return (false);
+      }
+      if ($('#A_date').val() == "") {
+        window.alert("La date est obligatoire");
+        $('#A_date').focus();
+        return (false);
+      }
+      if (!chk_date_format($('#A_date').val()) ){
+        window.alert("La date n'est pas valide ou pas au format jj/mm/aaaa");
+        $('#A_date').focus();
+        return (false);
+      }
+//      if (!end_sup_start($('#NoteStartTime').val(), $('#NoteEndTime').val()) ){
+      if ($('#NoteStartTime').val()> $('#NoteEndTime').val()) {
+        window.alert("L'heure de fin doit être postérieure ou égale à l'heure de début");
+        $('#NoteStartTime').focus();
+        return (false);
+      }
+      if (!check_select('zlParticipant')){
+        window.alert("Vous devez sélectionner au moins un participant");
+        $('#zlUtilisateur').focus();
+        return (false);
+      }
+		
+		return true;
+	}
+	
+	
     $(".datepicker").datepicker({
         format: "dd/mm/yyyy",
         weekStart: 1,
         autoclose: true
     });
+    // Permet de ne pas afficher l'horaire de la note lorsqu'elle couvre toute la journee
+    function affPlageHoraire(_allDay) {
+      var t1 = document.getElementById('plageHoraire');
+      var t2 = document.getElementById('plageHoraireFull');
+      if (!_allDay) {
+        t2.style.display = "none";
+        t1.style.display = "block";
+      } else {
+        t1.style.display = "none";
+        t2.style.display = "block";
+      }
+    }
 // Permet de ne pas afficher les details de chaque choix de la periodicite
     function affPeriodicite(idDiv) {
     var periodiciteVisible;
@@ -885,8 +958,9 @@ include "../footer.php";
 
 // Balises radio : retourne la valeur 'value' du radio checked
     function check(name) {
-        var inputs = document.getElementsByTagName(name),
-            inputsLength = inputs.length;
+        var inputs = document.getElementsByTagName(name);
+        var inputsLength = inputs.length;
+                alert('partage : '+inputsLength);
     
         for (var i = 0 ; i < inputsLength ; i++) {
             if (inputs[i].type == 'radio' && inputs[i].checked) {
@@ -905,7 +979,8 @@ include "../footer.php";
 		return checked;
 	}
 	
-// Balises select multiple: retoune un array des options selected
+	// Balises select multiple: 
+	// retour: string des options selected séparées par ##
 	function check_select(id) {
 		var inputs = document.getElementById(id);
 		var selecteds = "" ;
@@ -917,6 +992,10 @@ include "../footer.php";
 		return selecteds;
 	}
 
+    // Fonction trim javascript (suppression d'espaces avant et apres une chaine)
+    function trim(chaine) {
+      return chaine.replace(/^\s+/, "").replace(/\s+$/, "");
+    }
  
 </script>
 </body>
