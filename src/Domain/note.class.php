@@ -59,11 +59,12 @@ class Note
     public function setId($val) {
         $this->id = $val;
     }
-    public function getTitle() {
-        return $this->$title;
-    }
     public function setTitle($val) {
         $this->title = $val;
+    }
+    public function getTitle() {
+        /* @var $title type */
+        return $this->title;
     }
     public function getStart() {
         return $this->start;

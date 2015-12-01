@@ -560,7 +560,7 @@ include "../footer.php";
 			weekNumbers : true,
 //			weekNumberCalculation : 'local',
 			/* Pour affichage jour */
-			allDaySlot : false,
+			allDaySlot : true,
 			scrollTime : '08:00:00',
 			minTime : '07:00:00',
 			maxTime : '19:00:00',
@@ -596,7 +596,7 @@ include "../footer.php";
 //			height : 'auto',
 			views: {
 				month: { // name of view
-					titleFormat: 'DD, MM, YYYY'
+				//	titleFormat: 'DD, MM, YYYY'
 				// other view-specific options here
 				}
 			},
@@ -713,7 +713,6 @@ include "../footer.php";
 //		post_data['allDay'] = ($('#NoteAllDay').val()'] == "false");
 		post_data['participants'] = check_select('zlParticipant');
 		post_data['partage'] = check('optionsPartage');
-                alert('partage : '+post_data['partage']);
 		post_data['dispo'] = check('optionsDispo');
 		post_data['color'] = $('#couleur').val();
 		
@@ -815,6 +814,7 @@ include "../footer.php";
         weekStart: 1,
         autoclose: true
     });
+    
     // Permet de ne pas afficher l'horaire de la note lorsqu'elle couvre toute la journee
     function affPlageHoraire(_allDay) {
       var t1 = document.getElementById('plageHoraire');
@@ -827,6 +827,7 @@ include "../footer.php";
         t2.style.display = "block";
       }
     }
+    
 // Permet de ne pas afficher les details de chaque choix de la periodicite
     function affPeriodicite(idDiv) {
     var periodiciteVisible;
@@ -864,6 +865,7 @@ include "../footer.php";
         document.createAppointmentForm.NoteEndTime.selectedIndex = idxHeureFin;
       }
     }
+    
 // Ajuste la liste de choix de duree de la note en fonction de l'heure de fin selectionne
     function ajustHeureDuree() {
       var idxHeureDuree = document.createAppointmentForm.NoteEndTime.selectedIndex - document.createAppointmentForm.NoteStartTime.selectedIndex;
@@ -875,7 +877,6 @@ include "../footer.php";
     }
     
 /* Fonction de manupulation des listes dans les balises <selec t> */
-
     function genereListe(_liste, _tabTexte, _tabValue, _tailleTab) {
       for (var i=0; i<_tailleTab; i++)
         _liste.options[i]=new Option(_tabTexte[i], _tabValue[i]);
@@ -958,9 +959,8 @@ include "../footer.php";
 
 // Balises radio : retourne la valeur 'value' du radio checked
     function check(name) {
-        var inputs = document.getElementsByTagName(name);
+        var inputs = document.getElementsByName(name);
         var inputsLength = inputs.length;
-                alert('partage : '+inputsLength);
     
         for (var i = 0 ; i < inputsLength ; i++) {
             if (inputs[i].type == 'radio' && inputs[i].checked) {
@@ -970,12 +970,10 @@ include "../footer.php";
         }
     }
 // Balises checkbox : retourne la valeur true ou false en fonction de checked
-    function check_box(name) {
-        var inputs = document.getElementsByTagName(name);
-        var checked = false;
-		if (inputs.type == 'checkbox' && inputs.checked) {
-				checked	= true;
-			}
+    function check_box(Id) { 
+        var inputs = document.getElementById(Id); 
+        var checked = 0;
+        if(inputs.checked){checked	= 1; }
 		return checked;
 	}
 	

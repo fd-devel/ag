@@ -45,21 +45,21 @@ class NoteDAO extends DAO
     public function findByUser($id)
     {
         $stmt = $this->connection->prepare('
-            SELECT * FROM agenda_note WHERE user_id=:user_id
+            SELECT id, title, start, end, color, allDay, mere_id, user_id, creat_id, modif_id, lieu, detail, pers_concern, email, contact_associe, email_contact, partage, disponibilite, rappel, rappel_coef, periodicite, period_1, period_2, period_3 FROM agenda_note WHERE user_id=:user_id
         ');
         $stmt->execute(array("user_id"=>$id));
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         
-        // fetchAll() will do the same as above, but we'll have an array. ie:
-        //    $users = $repository->findAll();
-        //    echo $users[0]->firstname;
         $result = $stmt->fetchAll();
-        // Convert query result to an array of domain objects
- /*       $notes = array();
-       foreach ($result as $row) {
-            $noteId = $row['id'];
-            $notes[$noteId] = get_object_vars($this->buildDomainObject($row));
-        } */
+        
+        $cnt=count($result)-1;
+       for ($i=0; $i<=$cnt; $i++) { 
+          $result[$i]['start'] = preg_replace('/\s/', 'T', $result[$i]['start']);
+          $result[$i]['end'] = preg_replace('/\s/', 'T', $result[$i]['end']);
+          if($result[$i]['allDay'] == 0 ) unset($result[$i]['allDay']);
+           
+
+        } 
         return $result;
     }
     
@@ -95,13 +95,7 @@ class NoteDAO extends DAO
             'period_1' => $note->getPeriod_1(),
             'period_2' => $note->getPeriod_2(),
             'period_3' => $note->getPeriod_3()
-        );
-	  foreach ($note as $key => $val)
-	  {
-		  // On appelle le getter.
-		  $noteData[$key] = $val;
-		
-	  }	
+        );	
         
         if ($note->getId()) {
             // The note has already been saved : update it
@@ -110,7 +104,7 @@ class NoteDAO extends DAO
             // The note has never been saved : insert it
             $this->insert($noteData);
             // Get the id of the newly created note and set it on the entity
-            $id = $this->getDb()->lastInsertId();
+            $id = $this->connection->lastInsertId();
             $note->setId($id);
         }
     }
@@ -123,18 +117,21 @@ class NoteDAO extends DAO
     public function insert($noteData) {
 		
 		$columns = $values = "";
-		foreach ($noteData as $key)
+		foreach ($noteData as $key => $val)
 		{
-			$columns .= $columns == "" ? $key : " ,".$key;
+			$columns .= $columns == "" ? $key : ", ".$key;
 			$values	.= $values == "" ? ":".$key : ", :".$key;
 		}
-		
-/*			$method = 'get'.ucfirst($key);
-			$values	.= $this->$method();
-*/		
+				
 		$req = "INSERT agenda_note (".$columns.") values (".$values.")";
 		$stmt = $this->connection->prepare($req);
-        $stmt->execute();
+                
+                $data = array();
+                foreach ($noteData as $key => $val){
+                    $dataKey = ':'.$key;
+                    $data[$dataKey] = $val;
+                }
+        $stmt->execute($data);
     }
     
     /**
