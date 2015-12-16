@@ -9,15 +9,15 @@ class NoteDAO extends DAO
     private $connection; // PDO instance
     
     public function __construct(array $donnees = Null )
-	{
+    {
 		$this->setDb();
     }
 	
 	
-	public function setDb(\PDO $connection = null)
-	{
-		require '../../data/db-config.inc.php';
- 		
+    public function setDb(\PDO $connection = null)
+    {
+        require '../../data/db-config.inc.php';
+
         if ($this->connection === null) {
             $spb="mysql:host=" . $db["Server"] . ";port=" . $db["Port"] . ";dbname=" . $db["DB_Name"];
             $this->connection = new \PDO( $spb, $db['User'], $db['Password'] );
@@ -26,7 +26,7 @@ class NoteDAO extends DAO
                 \PDO::ERRMODE_EXCEPTION
             );
         }
-	}
+    }
 	
     public function findAll()
     {

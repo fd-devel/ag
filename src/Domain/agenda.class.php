@@ -2,21 +2,21 @@
 
 namespace Modea\Domain;
 
-class Note
+class Agenda
 {
-    private $id;                        //
-    private $title;                     //
-    private $start;                     //
-    private $end;                       //
-    private $allDay;                    //
-    private $mere_id;                   // Id de la note mère                   : integer
-    private $user_id;                   // Id de l'utilisateur concerné         : integer
-    private $creat_id;                  // Id de l'utilisateur qui a créé la note   : integer
-    private $creat_date;                // date de la création de la note       : integer
-    private $modif_id;                  // Id du dernier utilisateur qui a modifié la note  : integer
-    private $modif_date;                // date de la derniére modification     : integer
-    private $lieu;                      // libellé du lieu									: string
-    private $detail;                    // texte du détail de la note           : string
+    private $id_user;                   //
+    private $debut_journee;             //
+    private $fin_journee;               //
+    private $format_nom;                //
+    private $planning;                  //
+    private $partage_planning;          // Id de la note mère                   : integer
+    private $autorise_affect;           // Id de l'utilisateur concerné         : integer
+    private $alert_affect;              // Id de l'utilisateur qui a créé la note   : integer
+    private $semaine_type;              // date de la création de la note       : integer
+    private $duree_note;                // Id du dernier utilisateur qui a modifié la note  : integer
+    private $rappel_delai;              // date de la derniére modification     : integer
+    private $rappel_type;               // libellé du rappel_type									: string
+    private $rappel_email;              // texte du détail de la note           : string
     private $pers_concern;              // nombre de personnes concernées					:
     private $color;                     // color											:
     private $email;                     // rappel par email   : o/n             : bool
@@ -53,93 +53,93 @@ class Note
             }
       }
     }
-    public function getId() {
-        return $this->id;
+    public function getId_user() {
+        return $this->id_user;
     }
-    public function setId($val) {
-        $this->id = $val;
+    public function setId_user($val) {
+        $this->id_user = $val;
     }
-    public function setTitle($val) {
-        $this->title = $val;
+    public function setDebut_journee($val) {
+        $this->debut_journee = $val;
     }
-    public function getTitle() {
-        /* @var $title type */
-        return $this->title;
+    public function getDebut_journee() {
+        /* @var $debut_journee type */
+        return $this->debut_journee;
     }
-    public function getStart() {
-        return $this->start;
+    public function getFin_journee() {
+        return $this->fin_journee;
     }
-    public function setStart($val) {
-        $this->start = $val;
+    public function setFin_journee($val) {
+        $this->fin_journee = $val;
     }
-    public function getEnd() {
-        return $this->end;
+    public function getFormat_nom() {
+        return $this->format_nom;
     }
-    public function setEnd($val) {
-        $this->end = $val;
-    }
-
-    public function getAllDay() {
-        return $this->allDay;
-    }
-    public function setAllDay($val) {
-        $this->allDay = $val;
+    public function setFormat_nom($val) {
+        $this->format_nom = $val;
     }
 
-    public function getMere_id() {
-        return $this->mere_id;
+    public function getPlanning() {
+        return $this->planning;
     }
-    public function setMere_id($val) {
-        $this->mere_id = $val;
-    }
-
-    public function getUser_id() {
-        return $this->user_id;
-    }
-    public function setUser_id($val) {
-        $this->user_id = $val;
+    public function setPlanning($val) {
+        $this->planning = $val;
     }
 
-    public function getCreat_id() {
-        return $this->creat_id;
+    public function getPartage_planning() {
+        return $this->partage_planning;
     }
-    public function setCreat_id($val) {
-        $this->creat_id = $val;
-    }
-
-    public function getCreat_date() {
-        return $this->creat_date;
-    }
-    public function setCreat_date($val) {
-        $this->creat_date = $val;
+    public function setPartage_planning($val) {
+        $this->partage_planning = $val;
     }
 
-    public function getModif_id() {
-        return $this->modif_id;
+    public function getAutorise_affect() {
+        return $this->autorise_affect;
     }
-    public function setModif_id($val) {
-        $this->modif_id = $val;
-    }
-
-    public function getModif_date() {
-        return $this->modif_date;
-    }
-    public function setModif_date($val) {
-        $this->modif_date = $val;
+    public function setAutorise_affect($val) {
+        $this->autorise_affect = $val;
     }
 
-    public function getLieu() {
-        return $this->lieu;
+    public function getAlert_affect() {
+        return $this->alert_affect;
     }
-    public function setLieu($val) {
-        $this->lieu = $val;
+    public function setAlert_affect($val) {
+        $this->alert_affect = $val;
     }
 
-    public function getDetail() {
-        return $this->detail;
+    public function getSemaine_type() {
+        return $this->semaine_type;
     }
-    public function setDetail($val) {
-        $this->detail = $val;
+    public function setSemaine_type($val) {
+        $this->semaine_type = $val;
+    }
+
+    public function getDuree_note() {
+        return $this->duree_note;
+    }
+    public function setDuree_note($val) {
+        $this->duree_note = $val;
+    }
+
+    public function getRappel_delai() {
+        return $this->rappel_delai;
+    }
+    public function setRappel_delai($val) {
+        $this->rappel_delai = $val;
+    }
+
+    public function getRappel_type() {
+        return $this->rappel_type;
+    }
+    public function setRappel_type($val) {
+        $this->rappel_type = $val;
+    }
+
+    public function getRappel_email() {
+        return $this->rappel_email;
+    }
+    public function setRappel_email($val) {
+        $this->rappel_email = $val;
     }
 
     public function getPers_concern() {

@@ -5,3 +5,14 @@
 	margin-bottom: 30px;
 	
 }
+
+.alert {
+    margin: 0;
+}
+.pad-15{
+    padding: 15px;
+}
+
+td div label {
+    margin-right: 5px;
+}
