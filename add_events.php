@@ -3,9 +3,9 @@
 function formatDate($heure, $jour){
 	if(!preg_match('#^([0-9]{1,2})/([0-9]{1,2})/([0-9]{4})$#', $jour)) throw new \Exception("No author matching preg_match");
 	if(!preg_match('#^([0-9]{1,2}).[05]?$#', $heure)) echo 'error';
-	if (!preg_match('#/.#', $heure)) $heure .= ".00" ;
+	if (!preg_match('#\.#', $heure)) $heure .= ".00" ;
 	list($heure_f[0], $heure_f[1]) = explode('.',$heure);
-	$heure_f[1] = (!empty($heure_f[1])) ? $heure_f[1]*60 : 0 ;
+	$heure_f[1] = (!empty($heure_f[1])) ? $heure_f[1]*60/10 : 0 ;
 	list($jour_f[0],$jour_f[1],$jour_f[2]) = explode('/', $jour);
 	if(!checkdate($jour_f[1],$jour_f[0],$jour_f[2])) echo 'error';
 	$date_f = $jour_f[2].'-'.$jour_f[1].'-'.$jour_f[0].' '.$heure_f[0].':'.$heure_f[1].':00';

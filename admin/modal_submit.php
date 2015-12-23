@@ -35,16 +35,11 @@ function verifSel(theForm) {
       }
       return _checked;
     }
-function countSelect(_liste){
-    var _count = 0;
-    _count = document.getElementById(_liste).length;
-    return _count;
-}
     
 $('#submitBtn').click(function() {
     var _checked = verifSel(document.paramGenAgenda);
-    var _Sel_G = countSelect('groupesSelect');
-    var _Sel_U = countSelect('utilisateursSelect');
+    var _Sel_G = document.getElementById('groupesSelect').length;
+    var _Sel_U = document.getElementById('utilisateursSelect').length;
     var params, grpEtUsers;
     
     if(_checked && (_Sel_G || _Sel_U)){
@@ -67,15 +62,15 @@ $('#submitBtn').click(function() {
         params = "??...";
         grpEtUsers ="";
     }
-    
-    
    
      $('#params').html(params);
      $('#grp_users').html(grpEtUsers);
 });
 
 $('#submit').click(function(){
-    alert('submitting');
-    $('#paramsGenAgenda').submit();
+    document.getElementById('paramGenAgenda_Go').value="1";
+    document.getElementById('GrpSel').value = recupSelection('groupesSelect');
+    document.getElementById('UsersSel').value = recupSelection('utilisateursSelect');
+    $('#paramGenAgenda').submit();
 });
 </script>

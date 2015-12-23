@@ -1,15 +1,18 @@
 <?php
-
 // autoload des classes.
 function chargerClasse($classname) {
     require '../../data/modeles/' . $classname . '.class.php';
 }
-
 spl_autoload_register('chargerClasse');
-
 
 // Header (stronger - faster - better)
 include "../header.php";
+
+require './src/DAO/DAO.php';
+require './src/DAO/AgendaDAO.php';
+
+    include './inc/format_params.php';
+    
 
 // ----------------------------------------------------------------------------
 // FORMATAGE DES HEURES POUR L'AFFICHAGE
@@ -39,7 +42,6 @@ function afficheHeure($heure, $minute, $format = "H:i") {
 include "../footer.php";
 ?>
 
-
     <script src="../../assets/plugins/chosen/chosen.jquery.min.js"></script>
     <script src='../../../assets/plugins/fullcalendar/lib/moment.min.js'></script>
     <script src='../../../assets/plugins/fullcalendar/fullcalendar.min.js'></script>
@@ -68,6 +70,7 @@ include "../footer.php";
                 right: 'month,agendaWeek,agendaDay',
                 lang: 'fr'
             },
+            defaultView : '<?php echo $userParams['planning']; ?>' ,
             /* Pour affichage mois */
             weekNumbers: true,
 //			weekNumberCalculation : 'local',
@@ -76,16 +79,16 @@ include "../footer.php";
             scrollTime: '08:00:00',
             minTime: '07:00:00',
             maxTime: '19:00:00',
+            hiddenDays: <?php echo $userParams['semaine_type']; ?>,
             businessHours: {
-                start: '10:00', // a start time (10am in this example)
-                end: '18:00', // an end time (6pm in this example)
+                start: '<?php echo $userParams['debut_journee']; ?>' , //'07:00', // a start time (10am in this example)
+                end: '<?php echo $userParams['fin_journee']; ?>' ,// '20:00', // an end time (6pm in this example)
 
-//				dow: [ 1, 2, 3, 4 ]
-                // days of week. an array of zero-based day of week integers (0=Sunday)
-                // (Monday-Thursday in this example)
+                // [ 1, 2, 3, 4 ] days of week. an array of zero-based day of week integers (0=Sunday)
+                dow: [ 1, 2, 3, 4 ]
             },
             events: {
-                url: 'events.php?user=<?php echo $_SESSION['id_user']; ?>',
+                url: 'events.php?user=<?php echo $consultUser; ?>',
                 type: 'GET',
                 data: {
                     custom_param1: 'something',
@@ -94,8 +97,8 @@ include "../footer.php";
                 error: function() {
                     $('#script-warning').show();
                 },
-                //			color: 'yellow',   // a non-ajax option
-                //			textColor: 'black' // a non-ajax option
+                // color: 'yellow',   // a non-ajax option
+                // textColor: 'black' // a non-ajax option
 
             },
             eventRender: function(event, element) {
@@ -159,7 +162,7 @@ include "../footer.php";
                     // other view-specific options here
                 }
             },
-            slotDuration : '00:15:00',
+            slotDuration : '<?php echo $precision_planning; ?>', // '00:15:00',
             //	defaultDate: '2014-11-12',
             selectable: true,
             selectHelper: true,
@@ -191,7 +194,7 @@ include "../footer.php";
                 $('#createEventModal #when').text(mywhen);
                 $('#createEventModal').modal('show');
             },
-            editable: true
+            editable: false
         });
 
         // function for add event

@@ -468,14 +468,6 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
 
                         <hr>
 
-                        <!--  WHEN  -->
-                        <div class="control-group">
-                            <div class="col-xs-2">
-                                <label class="control-label" for="when">When:</label>
-                            </div>
-                            <div class="controls controls-row col-xs-10" id="when" style="margin-top:5px;">
-                            </div>
-                        </div>
                 </form>
             </div>
             <div class="modal-footer">

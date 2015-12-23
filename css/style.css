@@ -12,6 +12,9 @@
 .pad-15{
     padding: 15px;
 }
+.pad-10{
+    padding-left: 15px;
+}
 
 td div label {
     margin-right: 5px;

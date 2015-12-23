@@ -6,17 +6,20 @@ function chargerClasse($classname)
 }
 spl_autoload_register('chargerClasse');
 
+define('DIR_DB_CONFIG', '../../data/db-config.inc.php');
 
 require './src/DAO/DAO.php';
 require './src/DAO/AgendaDAO.php';
+require './src/DAO/CategorieDAO.php';
+require './src/Domain/categorie.class.php'; 
 
 // Message info (alert) sur l'ajout d'une radio
 //   ne sert qu'a initialiser la variable info_alert en php et en js.
 $info_alert = '<script>info_alert=0</script>';
 
-// Traitement de l'ajout
-if(isset($_POST['paramsGenAgenda_Go']) ) {
-    
+// Traitement des paramétres 
+if(isset($_POST['paramGenAgenda_Go']) && $_POST['paramGenAgenda_Go']==1 ) {
+
     $keys = array('debut_journee', 'fin_journee',
         'format_nom', 'planning', 'semaine_type', 'precision_planning',
         'duree_note', 'rappel_delai', 'rappel_type', 'rappel_email');
@@ -24,16 +27,16 @@ if(isset($_POST['paramsGenAgenda_Go']) ) {
     
     
         // Si aucune option cochée => toutes les options sont affectées
-    $ttesOptions = (isset($_POST['selJournee'])  &&
-       isset($_POST['selFormatNom']) &&
-        isset($_POST['selPlanning']) &&
-        isset($_POST['selSemaineType']) &&
-        isset($_POST['selPrecisAffich']) &&
-        isset($_POST['selDureeNote']) &&
-        isset($_POST['selRappel']) &&
-        isset($_POST['selAccesProfils']) &&
-        isset($_POST['selAccesAgenda']) &&
-        isset($_POST['selAccesNotes']) 
+    $ttesOptions = (!isset($_POST['selJournee'])  &&
+       !isset($_POST['selFormatNom']) &&
+        !isset($_POST['selPlanning']) &&
+        !isset($_POST['selSemaineType']) &&
+        !isset($_POST['selPrecisAffich']) &&
+        !isset($_POST['selDureeNote']) &&
+        !isset($_POST['selRappel']) &&
+        !isset($_POST['selAccesProfils']) &&
+        !isset($_POST['selAccesAgenda']) &&
+        !isset($_POST['selAccesNotes']) 
         ) ? true : false;
   
 
@@ -60,13 +63,13 @@ if(isset($_POST['paramsGenAgenda_Go']) ) {
         $agendaData['duree_note'] = $_POST['duree_note'];
     }
     if(isset($_POST['selRappel']) || $ttesOptions){
-        if($_POST['optionRappel']==2){
+        if(isset($_POST['optionRappel']) && $_POST['optionRappel']==1){
             $agendaData['rappel_delai'] = $_POST['tpsRappel'];
-            $agendaData['rappel_type'] = $_POST['rappel_coef'];
-            $agendaData['rappel_email'] = (array_key_exists('option_mail', $_POST)) ? 1 : 0 ;
+            $agendaData['rappel_type'] = $_POST['rappel_type'];
+            $agendaData['rappel_email'] = (array_key_exists('rappel_email', $_POST)) ? 1 : 0 ;
         }else{
-            $agendaData['rappel_delais'] = 0;
-            $agendaData['rappel_type'] = 0;
+            $agendaData['rappel_delai'] = 0;
+            $agendaData['rappel_type'] = 1;
             $agendaData['rappel_email'] = 0 ;
         }
 
@@ -88,32 +91,63 @@ if(isset($_POST['paramsGenAgenda_Go']) ) {
     $yep = new Modea\DAO\AgendaDAO();
     
     $selUsers = false;
-    if(!$selUsers){     // Si aucun utilisateur choisit => paramétrage par defaut 
-          
-        $yep->saveParam($agendaData);
+    if( (isset($_POST['GrpSel']) && !empty($_POST['GrpSel'])) || (isset($_POST['UsersSel']) && !empty($_POST['UsersSel']))){
+        $selUsers = true;
+        $UsersToModif = array();
+        require './src/Utilisateur_Groupe.extends.class.php';
+        if(isset($_POST['GrpSel']) && !empty($_POST['GrpSel'])){
+            $groupesSelect = explode('+',$_POST['GrpSel']);
+                $unGroupe = new GroupAndUser();
+            foreach ($groupesSelect as $Gs) {
+//                $unGroupe = new Utilisateur_Groupe();
+                $laListe = $unGroupe->getUtilisateurByGroupe($Gs);
+                foreach ($laListe as $U_s => $I_d) {
+                    array_push($UsersToModif, $I_d);
+                }
+            }
+        }
+        if(isset($_POST['UsersSel']) && !empty($_POST['UsersSel'])){
+            $usersSelect = explode('+',$_POST['UsersSel']);
+            foreach ($usersSelect as $Us) {
+                array_push($UsersToModif, $Us);
+            }
+        }
+        array_unique($UsersToModif);
+    }
     
-  
+    if(!$selUsers){     // Si aucun utilisateur choisit => paramétrage par defaut 
+        $yep->saveParam($agendaData);
     }  else {
-        
-    $yap = new Modea\Domain\Agenda($agendaData);
-        $yep->save($yap);
+        foreach ($UsersToModif as $user) {
+            $agendaData['Id_user'] = $user;
+            $yap = new Modea\Domain\Agenda($agendaData);
+            $yep->save($yap);
+        }
     }
         
-	$erreur ="";
+	$erreur ="1";
         // Message de confirmation 
         $info_alert ='<script>info_alert='.$erreur.'</script>';
 	
 }
 
+// Traitement des catégories
+if(isset($_POST['yep']) 
+        && (isset($_POST['text']) && !empty($_POST['text'] )) 
+        && (isset($_POST['cp1']) && !empty($_POST['cp1'])) ){
+    
+    $add_cat['nom'] = $_POST['text'];
+    $add_cat['couleur'] = $_POST['cp1'];
+    $dao = new Modea\DAO\CategorieDAO();
+    $obj = new Modea\Domain\Categorie($add_cat);
+    $dao->save($obj);
+}
 
-// Textes des Popovers
-//
-$journTp_pop_titre = "<div class=' panel-heading bg-success'> Journée type :</div>";
-$journTp_pop_corps = "Horaires début et fin de la journée de base.";
 
 //  Hearder
 require "../header.php";
 
+include 'admin/text_popover.php';
 
 $yap = new Modea\DAO\AgendaDAO();
 $params=$yap->findParam();
@@ -139,6 +173,30 @@ $sem_typ5 = $sem_5 == 0 ? "" : "checked";
 $sem_typ6 = $sem_6 == 0 ? "" : "checked";
 $sem_typ7 = $sem_7 == 0 ? "" : "checked";
 
+// Precision d'affichage
+$precis1 = ($params[6]['Default'] == 1) ? "selected" : "";
+$precis2 = ($params[6]['Default'] == 1) ? "" : "selected";
+
+// Duree par efaut d'une note
+$duree1 = ($params[7]['Default'] == 1) ? "selected" : "";
+$duree2 = ($params[7]['Default'] == 2) ? "selected" : "";
+$duree3 = ($params[7]['Default'] == 3) ? "selected" : "";
+$duree4 = ($params[7]['Default'] == 4) ? "selected" : "";
+
+// Rappel
+$rappel1 = ($params[8]['Default'] == 0) ? "checked" : "";
+$rappel2 = ($params[8]['Default'] > 0) ? "checked" : "";
+
+$rappelTps = 5;
+if($params[8]['Default'] > 0) $rappelTps = $params[8]['Default'];
+
+
+$rappelTyp1 = ($params[9]['Default'] == 1) ? "selected" : "";
+$rappelTyp2 = ($params[9]['Default'] == 60) ? "selected" : "";
+$rappelTyp3 = ($params[9]['Default'] == 1440) ? "selected" : "";
+
+$rappelMail = ($params[10]['Default'] == 1) ? "checked" : "";
+
 // Info alerte de l'ajout d'une nouvelle radio
 echo $info_alert;
 
@@ -153,6 +211,7 @@ function afficheHeure($heure, $minute, $format = "H:i") {
 ?>
 
 <link href="css/style.css" rel="stylesheet">
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
 
 
 <div class="container-fluid">
@@ -247,7 +306,7 @@ for ($i = 0; $i <= 23.5; $i = $i + 0.5) {
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop1" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop1_titre; ?>" data-content="<?php echo $pop1_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -267,14 +326,14 @@ for ($i = 0; $i <= 23.5; $i = $i + 0.5) {
                         </td>
                         <td>
                             <div class="pad-15">
-                                <label for="aff_noms_1"><input type="radio" name="aff_noms" id="aff_noms_1" value="1" <?php echo $checked_nom1; ?>>Nom prénom</label>
-                                <label for="aff_noms_2"><input type="radio" name="aff_noms" id="aff_noms_2" value="2" <?php echo $checked_nom2; ?>>Prénom Nom</label>
+                                <label for="aff_noms_1"><input type="radio" name="aff_noms" id="aff_noms_1" value="0" <?php echo $checked_nom1; ?>>Nom prénom</label>
+                                <label for="aff_noms_2"><input type="radio" name="aff_noms" id="aff_noms_2" value="1" <?php echo $checked_nom2; ?>>Prénom Nom</label>
                             </div>
                         </td>
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop2" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop2_titre; ?>" data-content="<?php echo $pop2_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -304,7 +363,7 @@ for ($i = 0; $i <= 23.5; $i = $i + 0.5) {
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop3" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop3_titre; ?>" data-content="<?php echo $pop3_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -324,19 +383,20 @@ for ($i = 0; $i <= 23.5; $i = $i + 0.5) {
                         </td>
                         <td>
                             <div class="pad-15">
-                                <label for="sem_typ_1"><input type="checkbox" name="sem_typ_1" id="sem_typ_1" value="1" <?php echo $sem_typ1; ?>> Lun </label>
-                                <label for="sem_typ_2"><input type="checkbox" name="sem_typ_2" id="sem_typ_2" value="2" <?php echo $sem_typ2; ?>> Mar </label>
-                                <label for="sem_typ_3"><input type="checkbox" name="sem_typ_3" id="sem_typ_3" value="3" <?php echo $sem_typ3; ?>> Mer </label>
-                                <label for="sem_typ_4"><input type="checkbox" name="sem_typ_4" id="sem_typ_4" value="4" <?php echo $sem_typ4; ?>> Jeu </label>
-                                <label for="sem_typ_5"><input type="checkbox" name="sem_typ_5" id="sem_typ_5" value="5" <?php echo $sem_typ5; ?>> Ven </label>
-                                <label for="sem_typ_6"><input type="checkbox" name="sem_typ_6" id="sem_typ_6" value="6" <?php echo $sem_typ6; ?>> Sam </label>
-                                <label for="sem_typ_7"><input type="checkbox" name="sem_typ_7" id="sem_typ_7" value="7" <?php echo $sem_typ7; ?>> Dim </label>
+<?php
+$JoursCourts = array('','Lun','Mar','Mer','Jeu','Ven','Sam','Dim');
+for ($i=1; $i<=7; $i++){
+    $sem='sem_typ'.$i;
+    echo '<label for="sem_typ_'.$i.'"><input type="checkbox" name="sem_typ_'.$i.'" id="sem_typ_'.$i.'" value="'.$i.'" '.$$sem.'> '.$JoursCourts[$i].' </label>';
+}
+?>
+                                
                             </div>
                         </td>
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop4" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop4_titre; ?>" data-content="<?php echo $pop4_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -356,16 +416,16 @@ for ($i = 0; $i <= 23.5; $i = $i + 0.5) {
                         </td>
                         <td>
                             <div class="pad-15">
-                                <select class="form-control" id="agenda_def" name="precis_aff" style="width:auto;" >
-                                    <option selected="" value="1">30 minutes</option>
-                                    <option value="2">15 minutes</option>
+                                <select class="form-control" id="precis_aff" name="precis_aff" style="width:auto;" >
+                                    <option <?php echo $precis1; ?> value="1">30 minutes</option>
+                                    <option <?php echo $precis2; ?> value="2">15 minutes</option>
                                 </select>
                             </div>
                         </td>
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop5" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop5_titre; ?>" data-content="<?php echo $pop5_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -386,17 +446,20 @@ for ($i = 0; $i <= 23.5; $i = $i + 0.5) {
                         <td>
                             <div class="pad-15">
                                 <select class="form-control" id="duree_note" name="duree_note" style="width:auto;" >
-                                    <option selected="" value="1">15 minutes</option>
-                                    <option value="2">30 minutes</option>
-                                    <option value="2">45 minutes</option>
-                                    <option value="2">1 heure</option>
+<?php
+$dureeTxt = array('','15 minutes','30 minutes','45 minutes','1 heure');
+for ($i=1; $i<=4; $i++){
+    $duree='duree'.$i;
+    echo '<option '.$$duree.' value="'.$i.'"> '.$dureeTxt[$i].' </option>';
+}
+?>
                                 </select>
                             </div>
                         </td>
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop6" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop6_titre; ?>" data-content="<?php echo $pop6_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -417,31 +480,32 @@ for ($i = 0; $i <= 23.5; $i = $i + 0.5) {
                         <td>
                             <div class="pad-15">
                             <div >
-                                <label style="padding:0;"><input type="radio" name="optionsRappel" id="optionsRappel1" value="1" checked>
-                                Pas de rappel
+                                <label style="padding:0;">
+                                    <input type="radio" name="optionRappel" id="optionRappel1" value="0" <?php echo $rappel1; ?>>
+                                    Pas de rappel
                                 </label>
                             </div>
                             <div>
                                 <label style="padding:0;">
-                                <input type="radio" name="optionsRappel" id="optionsRappel2" value="2" >
-                                rappel
-                                <select class="form-control" id="tpsRappel" name="tpsRappel" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRappel2').checked = 'true'">
+                                    <input type="radio" name="optionRappel" id="optionRappel2" value="1" <?php echo $rappel2; ?> >
+                                    rappel
+                                <select class="form-control" id="tpsRappel" name="tpsRappel" style="display:inline; width:auto;" onfocus="document.getElementById('optionRappel2').checked = 'true'">
    <?php
 for ($i = 1; $i <= 59; $i++) {
-$selected = ($i == 5) ? 'selected=""' : '';
+$selected = ($i == $rappelTps) ? 'selected=""' : '';
 echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
 }
 ?>
                                 </select>
-                                <select class="form-control" id="rappel_coef" name="rappel_coef" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRappel2').checked = 'true'">
-                                    <option value="1">minute(s)</option>
-                                    <option value="60">heure(s)</option>
-                                    <option value="1440">jour(s)</option>
+                                <select class="form-control" id="rappel_type" name="rappel_type" style="display:inline; width:auto;" onfocus="document.getElementById('optionsRappel2').checked = 'true'">
+                                    <option value="1" <?php echo $rappelTyp1; ?>>minute(s)</option>
+                                    <option value="60" <?php echo $rappelTyp2; ?>>heure(s)</option>
+                                    <option value="1440" <?php echo $rappelTyp3; ?>>jour(s)</option>
                                 </select>
                                     avant.
                                 </label>
                                 <label class="checkbox-inline">
-                                    <input type="checkbox" id="ckEmail" name="option_mail" value="1">Copie par mail
+                                    <input type="checkbox" id="rappel_email" name="rappel_email" value="1" <?php echo $rappelMail; ?>>Copie par mail
                                 </label>
                             </div>
                             </div>
@@ -450,7 +514,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop7" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop7_titre; ?>" data-content="<?php echo $pop7_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -473,7 +537,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop8" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop8_titre; ?>" data-content="<?php echo $pop8_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -496,7 +560,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop9" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop9_titre; ?>" data-content="<?php echo $pop9_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -519,7 +583,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
                         <td >
                             <!-- ( Info ) popover  -->
                             <div class="pad-15">
-                                <button id="eee" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $journTp_pop_titre; ?>" data-content="<?php echo $journTp_pop_corps; ?>" >
+                                <button id="pop10" type="button" class="btn btn-default" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="left" title="<?php echo $pop10_titre; ?>" data-content="<?php echo $pop10_coprs; ?>" >
                                     <i class="fa fa-info-circle"></i>
                                 </button>
                             </div>
@@ -768,49 +832,73 @@ foreach($Liste_Utilisateurs as $utilisateur)
  <!--------------------------------------------->
         <button type="submit" class="btn btn-success">Pas celui-là --></button>
         <input type="button" name="btn" value="Valider" id="submitBtn" data-toggle="modal" data-target="#confirm-submit" class="btn btn-default" />
-        <input type="hidden" name="paramsGenAgenda_Go" value="1">
+        <input type="hidden" name="paramGenAgenda_Go" id="paramGenAgenda_Go" value="0">
+        <input type="hidden" name="GrpSel" id="GrpSel" value="0">
+        <input type="hidden" name="UsersSel" id="UsersSel" value="0">
             </form>
         </div>
     </div>
         <!-- Fin LISTE -->
 	
-	<!-- AJOUT -->
-    <div class="panel panel-warning">
+	<!-- CATEGORIES ET COULEURS -->
+        
+<?php
+
+
+
+    $couleur = "#8fdf82";
+    $newCat = new Modea\DAO\CategorieDAO();
+    $categories = $newCat->findAll();
+?>
+        <div class="panel panel-warning" style="margin-bottom: 80px">
         <div class="panel-heading" style="padding:10px 15px;">
             <h3 class="panel-title">
                 <i class="fa fa-info" style="margin-right:10px"></i>
-                Ajouter une nouvelle station de radio ?
+                Categories et couleurs des notes
             </h3>
         </div>
         
         <div class="panel-body">
-            <form name="Nvelle_radio" action="admin.php" method="post" enctype="multipart/form-data">
+            <fieldset>
+                <div class="row">
+<?php
+if($categories){
+    foreach ($categories as $categorie) {
+
+        echo      ' <div class="col-xs-offset-1 col-xs-5 ">';
+        echo      '     <input type="text" disabled="" value="'. $categorie['nom'] .' " style="background-color:' . $categorie['couleur'] .' ;  " />' ;
+        echo      '     <a onclick="javascript:valider_suppression('. $categorie['id']. ' ,this);" data-toggle="tooltip" title="Supprimer" class="btn btn-warning" ><i class="fa fa-trash-o"></i></a>';
+        echo      ' </div> ';          
+    }
+}
+ else {
+    echo '<div class="col-xs-offset-1 col-xs-10">';
+    echo '<h4> Pas de catégorie.</h4>';
+    echo '</div>';
+}
+?>
+                </div>
+            </fieldset>
+            <form name="Nvelle_categorie" action="admin.php" method="post" >
                 <fieldset>
-                    <legend>Nouvelle radio</legend>
-                    <div class="row input-group " style="display: block;">
-                        <div class="col-md-offset-1 col-md-3 col-xs-12">
-                            <label class="control-label" for="appons1">Nom </label>
-                            <input class="form-control focused" id="appons1" name="nom" type="text" placeholder="Nom de la radio">
-                        </div>
-                        <div class="col-md-offset-1 col-md-7 col-xs-12">
-                            <label class="control-label" for="appons2">Adresse url</label>
-                            <input class="form-control " id="appons2" name="url" type="text" placeholder="Url complète ex : http://radio.com/stream">
-                        </div>
+                    <legend>Nouvelle categorie</legend>
+                    <div class="row  " >
                         <div class="col-md-offset-1 col-md-4 col-xs-12">
-                            <label class="control-label" for="appons3">Logo </label>
-                            <input type="hidden" name="MAX_FILE_SIZE" value="500000" />
-                            <input id="appons3" class="form-control" type="text" placeholder="Image...(max:500Ko)" readonly="">
-                            <span class="input-group-btn">
-                                <span class="btn btn-default btn-file">Parcourir…<input type="file" name="logo_file" id="imgInp"></span>
-                            </span>
+                            <label class="control-label" for="appons1">categorie </label>
+                            <input class="form-control focused" id="appons1" name="text" type="text" placeholder="Nom de la catégorie">
                         </div>
-                        <div class="col-md-offset-2 col-md-5 col-xs-12" >
+                        <div class="col-md-6 col-xs-12">
+                            <label class="control-label" for="cp1" style="display: block;">Couleurs</label>
+                            <input id="cp1" name="cp1" class="color pad-10 " value="<?php echo $couleur; ?>" placeholder="<?php echo $couleur; ?>" />
+                        </div>
+                        <div class="col-md-offset-2 col-md-7 col-xs-12" >
                             <label class="control-label" for="appons4" style="display: block;">Aperçu </label>
-                            <img class="img-thumbnail" id="appons4" alt="Aperçu Image" src="../../assets/img/img-file/img.png" Style="width:100px;height:100px;text-align:center;">
+                            <input type="text" class="pad-10" id="appercu" disabled="" value="test" style="background-color: <?php echo $couleur; ?>;" />
+                            
                             
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-success">Oui c'est bon, vas'y</button>
+                    <button type="submit" class="btn btn-success"> Créer </button>
                     <input type="hidden" name="yep" value="1">
                 </fieldset>
             </form>
@@ -822,94 +910,33 @@ foreach($Liste_Utilisateurs as $utilisateur)
     <!-- FIN Contenu de la page -->
 </div>
 
-
 <?php
 // Chargement du footer
 include "../footer.php";
-// Modale ==> Validation
-include "admin/modal_submit.php";
 ?>
-
-
 <!-- Javascript -->
 <script src="modeles/admin.js" ></script>
-<script>
-    
-    /* Fonction de manupulation des listes dans les balises <selec t> */
-    function genereListe(_liste, _tabTexte, _tabValue, _tailleTab) {
-        for (var i = 0; i < _tailleTab; i++)
-            _liste.options[i] = new Option(_tabTexte[i], _tabValue[i]);
+<script src="js/functions.js"></script>
+<script src="js/admin.js"></script>
+
+<!--??????????????????-->
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>  
+<!--?????????????????-->
+
+<script src="js/jqColorPicker.min.js"></script>
+<script type="text/javascript">
+
+    var $colors = $('input.color').colorPicker({
+    customBG: '#222',
+    readOnly: true,
+    init: function(elm, colors) { // colors is a different instance (not connected to colorPicker)
+      elm.style.backgroundColor = elm.value;
+      elm.style.color = colors.rgbaMixCustom.luminance > 0.22 ? '#222' : '#ddd';
     }
-
-    function bubbleSort(_tabText, _tabValue, _tailleTab) {
-        var i, s;
-
-        do {
-            s = 0;
-            for (i = 1; i < _tailleTab; i++)
-                if (_tabText[i - 1] > _tabText[i]) {
-                    y = _tabText[i - 1];
-                    _tabText[i - 1] = _tabText[i];
-                    _tabText[i] = y;
-                    y = _tabValue[i - 1];
-                    _tabValue[i - 1] = _tabValue[i];
-                    _tabValue[i] = y;
-                    s = 1;
-                }
-        } while (s);
-    }
-
-    function videListe(_liste) {
-        var cpt = _liste.options.length;
-
-        for (var i = 0; i < cpt; i++) {
-            _liste.options[0] = null;
-        }
-    }
-
-    function selectUtil(_listeSource, _listeDest) {
-        var i, j;
-        var ok = false;
-        var tabDestTexte = new Array();
-        var tabDestValue = new Array();
-        var tailleTabDest = 0;
-
-        for (i = 0; i < _listeDest.options.length; i++) {
-            tabDestTexte[tailleTabDest] = _listeDest.options[i].text;
-            tabDestValue[tailleTabDest++] = _listeDest.options[i].value;
-        }
-
-        for (j = _listeSource.options.length - 1; j >= 0; j--) {
-            if (_listeSource.options[j].selected) {
-                ok = true;
-                tabDestTexte[tailleTabDest] = _listeSource.options[j].text;
-                tabDestValue[tailleTabDest++] = _listeSource.options[j].value;
-                _listeSource.options[j] = null;
-            }
-        }
-
-        if (ok) {
-            //Trie du tableau
-            bubbleSort(tabDestTexte, tabDestValue, tailleTabDest);
-            //Vide la liste destination
-            videListe(_listeDest);
-            //Recree la liste
-            genereListe(_listeDest, tabDestTexte, tabDestValue, tailleTabDest);
-        }
-    }
-
-    //Fonction pour selectionner tous les utilisateurs d'une liste source et les transferer dans une liste destination
-    function selectAll(_listeSource, _listeDest) {
-        for (var i = 0; i < _listeSource.options.length; i++) {
-            _listeSource.options[i].selected = true;
-        }
-        selectUtil(_listeSource, _listeDest);
-    }
-
-    function recupSelection(_liste, _champ) {
-        _champ.value = "";
-        for (var i = 0; i < _liste.options.length; i++) {
-            _champ.value += ((i) ? "+" : "") + _liste.options[i].value;
-        }
-    }
+  }).each(function(idx, elm) {
+		 $(elm).css({'background-color': this.value})
+	});
 </script>
+<?php
+// Modale ==> Validation
+include "admin/modal_submit.php";
