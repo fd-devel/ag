@@ -1,8 +1,8 @@
 <?php
             
 function formatDate($heure, $jour){
-	if(!preg_match('#^([0-9]{1,2})/([0-9]{1,2})/([0-9]{4})$#', $jour)) throw new \Exception("No author matching preg_match");
-	if(!preg_match('#^([0-9]{1,2}).[05]?$#', $heure)) echo 'error';
+	if(!preg_match('#^([0-3]{1})([0-9]{1})\/([0-1]{1})([0-9]{1})\/[2]([0-9]{3})$#', $jour)) throw new \Exception("No date matching preg_match");
+	if(!preg_match('#^[0-9]{1,2}[.05]?$#', $heure)) echo 'error';
 	if (!preg_match('#\.#', $heure)) $heure .= ".00" ;
 	list($heure_f[0], $heure_f[1]) = explode('.',$heure);
 	$heure_f[1] = (!empty($heure_f[1])) ? $heure_f[1]*60/10 : 0 ;
@@ -12,7 +12,7 @@ function formatDate($heure, $jour){
 	return $date_f;
 }
 
-$id_user=$_GET['user'];
+$id_user=$_POST['user'];
 
 if($_POST['note']){
 
@@ -35,7 +35,7 @@ $noteData['lieu']       = !$note['lieu'] == "" ? $note['lieu'] : "";
 $noteData['detail']     = !$note['detail'] == "" ? $note['detail'] : "";
 $noteData['partage']    = ($note['partage'] != 1) ? 0 : 1;
 $noteData['dispo']      = ($note['dispo'] != 1) ? 0 : 1;
-$noteData['color']      = '#D925AC' ; //$note['color'];
+$noteData['color']      = !$note['color'] == "" ? $note['color'] : '#D925AC' ; //$note['color'];
 
 $noteData['periodicite'] = $note['periodicite'];
 switch ($note['periodicite']){
@@ -123,6 +123,6 @@ $yap = new Modea\Domain\Note($noteData);
 $yep = new Modea\DAO\NoteDAO();
 $yep->save($yap);
 
-
+echo 'Success';
 }
 ?>

@@ -1,5 +1,5 @@
 <?php
-$id_user=$_GET['user'];
+$id_user=$_POST['user'];
 
 require './src/DAO/DAO.php';
 require './src/DAO/NoteDAO.php';

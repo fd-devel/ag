@@ -16,7 +16,7 @@ class AgendaDAO extends DAO
 	
     public function setDb(\PDO $connection = null)
     {
-        require DIR_DB_CONFIG;
+        require '../../data/db-config.inc.php';
 
         if ($this->connection === null) {
             $spb="mysql:host=" . $db["Server"] . ";port=" . $db["Port"] . ";dbname=" . $db["DB_Name"];
@@ -63,7 +63,17 @@ class AgendaDAO extends DAO
         $stmt->execute(array("id_user"=>$id));
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         $tmp = $stmt->fetchAll();
-        $result = $this->buildDomainObject($tmp[0]);
+        
+        if(!empty($tmp)){
+            $result = $this->buildDomainObject($tmp[0]);
+        }  else {
+            $params = $this->findParam();
+            foreach ($params as $param) {
+                $tmp[$param['Field']] = $param['Default'];
+            }
+            $result = $this->buildDomainObject($tmp);
+            
+        }
         return $result;
     }
     
@@ -96,13 +106,13 @@ class AgendaDAO extends DAO
         if($agenda['duree_note']){
             $sql .= " CHANGE duree_note duree_note enum('1','2','3','4') CHARACTER SET utf8 COLLATE utf8_bin NOT NULL DEFAULT '".$agenda['duree_note']."',";
         }
-        if($agenda['rappel_delai'] || 1){
+        if($agenda['rappel_delai'] ){
             $sql .= " CHANGE rappel_delai rappel_delai tinyint(3) unsigned NOT NULL DEFAULT '".$agenda['rappel_delai']."',";
         }
         if($agenda['rappel_type']){
             $sql .= " CHANGE rappel_type rappel_type smallint(5) unsigned NOT NULL DEFAULT '".$agenda['rappel_type']."',";
         }
-        if($agenda['rappel_email'] || 1){
+        if($agenda['rappel_email'] ){
             $sql .= " CHANGE rappel_email rappel_email tinyint(3) unsigned NOT NULL DEFAULT '".$agenda['rappel_email']."',";
         }
         

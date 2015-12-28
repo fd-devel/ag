@@ -1,3 +1,25 @@
+<?php
+
+if(isset($_GET['ladate'])){
+    $ladate = $_GET['ladate'];
+}
+
+require './src/Utilisateur_Groupe.extends.class.php';
+// ----------------------------------------------------------------------------
+// FORMATAGE DES HEURES POUR L'AFFICHAGE
+// ----------------------------------------------------------------------------
+function afficheHeure($heure, $minute, $format = "H:i") {
+    return date($format, mktime($heure, ($minute * 60) % 60, 0, 1, 1, 2000));
+}
+
+// ----------------------------------------------------------------------------
+?>
+
+</head>
+<body>
+
+
+
 
     <!-- Modal -->
 <div id="createEventModal" class="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1" aria-hidden="true">
@@ -11,7 +33,7 @@
                 <form id="createAppointmentForm" name="createAppointmentForm" class="form-horizontal" method="post">
                     <div class="control-group">
 
-                        <!--  LIBELLE   -->
+    <!--  LIBELLE   -->
                         <div class="form-group">
                             <div class="col-xs-2">
                                 <label class="control-label col-xs-12 col-sm-2" for="NoteLibelle" >Libellé:</label>
@@ -34,7 +56,7 @@
                             </div>
                         </div>
 
-                        <!--  DÉTAIL   -->
+    <!--  DÉTAIL   -->
                         <div class="form-group">
                             <div class="col-xs-2">
                                 <label for="detail" class="control-label col-xs-12 col-sm-2">Détail</label>
@@ -44,7 +66,7 @@
                             </div>
                         </div>
 
-                        <!--  DATE  -->
+    <!--  DATE  -->
                         <div class="form-group">
                             <div class="col-xs-2">
                                 <label for="A_date" class="control-label col-xs-12 col-sm-2">Date</label>
@@ -62,7 +84,7 @@
                             </div>
                         </div>
 
-                        <!--  HORAIRES   -->
+    <!--  HORAIRES   -->
                         <div class="form-group input-group-sm " >
                             <div class="col-xs-2">
                                 <label for="A_date" class="control-label col-xs-12 col-sm-2">Horaires</label>
@@ -106,7 +128,24 @@ echo '<option value="' . $i . '" ' . $selected . '>' . afficheHeure($i, $i) . '<
 
                         <hr>
 
-                        <!--  PERSONNES CONCERNÉES   -->
+    <!--  PERSONNES CONCERNÉES   -->
+<?php
+//    $Liste_GrpOfUser=array();
+    $UsersToAffect = array();
+    $GrpOfUserS = new Utilisateur_Groupe();
+    $Liste_GrpOfUser=$GrpOfUserS->getUtilisateur_GroupeListUserID($consultUser);
+
+    $unGroupe = new GroupAndUser();
+    foreach ($Liste_GrpOfUser as $Gs) {
+        $laListe = $unGroupe->getUtilisateurByGroupe($Gs['id_groupe']);
+        foreach ($laListe as $U_s => $I_d) {
+            array_push($UsersToAffect, $I_d);
+        }
+    }
+    array_unique($UsersToAffect);
+    
+
+?>
                         <div class="form-group input-group-sm ">
                             <div class="col-xs-2">
                                 <label for="A_date" class="control-label col-xs-12 col-sm-2">Personnes concernées</label>
@@ -121,11 +160,19 @@ echo '<option value="' . $i . '" ' . $selected . '>' . afficheHeure($i, $i) . '<
 
                                 <div class="col-xs-5">
                                     <select class="form-control"  multiple="" size="8" id="zlUtilisateur" name="zlUtilisateur">
-                                        <option value="51">Superman</option>
-                                        <option value="514">Batman</option>
-                                        <option value="551">Wolverine</option>
-                                        <option value="5">Canard</option>
-                                        <option value="1">coincoin</option>
+<?php
+    foreach($UsersToAffect as $utilisateur)
+    {
+        $P_concernees = new User();
+        $P_concernees->getUserDB($utilisateur);
+        $option = "<option value=".$P_concernees->getID().">".$P_concernees->getNom() ." ".$P_concernees->getPrenom()."</option>";  
+        if($P_concernees->getID() <> $consultUser){
+            echo $option;
+        }  else {
+            $option_user = $option;
+        }
+    }
+?>
                                     </select>
                                 </div>
                                 <div class="col-xs-2">
@@ -155,7 +202,9 @@ echo '<option value="' . $i . '" ' . $selected . '>' . afficheHeure($i, $i) . '<
                                 </div>
                                 <div class="col-xs-5">
                                     <select class="form-control"  multiple="" size="8" id="zlParticipant" name="zlParticipant">
-
+<?php
+            echo $option_user;
+?>
                                     </select>
                                 </div>
                             </div>
@@ -164,7 +213,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . afficheHeure($i, $i) . '<
 
                         <hr>
 
-                        <!--  PARTAGE  -->
+    <!--  PARTAGE  -->
                         <div class="form-group">
                             <div class="col-xs-2">
                                 <label class="control-label col-xs-12 col-sm-2">Partage</label>
@@ -183,7 +232,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . afficheHeure($i, $i) . '<
 
                         <hr>
 
-                        <!--  DISPONIBILITE  -->
+    <!--  DISPONIBILITE  -->
                         <div class="form-group">
                             <div class="col-xs-2">
                                 <label for="A_date" class="control-label col-xs-12 col-sm-2">Disponibilité</label>
@@ -202,30 +251,46 @@ echo '<option value="' . $i . '" ' . $selected . '>' . afficheHeure($i, $i) . '<
 
                         <hr>
 
-                        <!--  COULEUR  -->
+    <!--  COULEUR  -->
+<?php
+
+require './src/DAO/CategorieDAO.php';
+require './src/Domain/categorie.class.php'; 
+
+    $newCat = new Modea\DAO\CategorieDAO();
+    $categories = $newCat->findAll();
+    if(empty($categories)){
+        $cat_def = $newCat->findParam();
+        $categories[0]['nom'] = $cat_def[2]['Default'];
+        $categories[0]['couleur'] = $cat_def[3]['Default'];
+    }
+
+?>
+
                         <div class="form-group">
                             <div class="col-xs-2">
                                 <label for="detail" class="control-label col-xs-12 col-sm-2">Couleur</label>
                             </div>
                             <div class="col-xs-10">
                                 <div class=" col-sm-5">
-                                    <select class="form-control" name="couleur" id="couleur">
-                                        <option value="1">bleu</option>
-                                        <option value="2">Vert</option>
-                                        <option value="3">Jaune</option>
-                                        <option value="4">Rose</option>
-                                        <option value="5">Rouge</option>
+                                    <select class="form-control" name="couleur" id="couleur" onchange="apparence()">
+<?php
+    foreach ($categories as $cat) {
+        echo '<option value=" '.$cat['couleur'].'" style="padding-bottom:10px; background-color:'.$cat['couleur'].'">'.$cat['nom'].'</option>';
+    }
+?>
+
                                     </select>
                                 </div>
                                 <div class="col-xs-offset-1 col-xs-4">
-                                    <input type="text" class="" value="Apparence" disabled>
+                                    <input type="text" id="Apparence" class="" value="Apparence" disabled>
                                 </div>
                             </div>
                         </div>
 
                         <hr>
 
-                        <!--  PÉRIODICITÉ  -->
+    <!--  PÉRIODICITÉ  -->
                         <div class="form-group">
                             <div class="col-xs-2">
                                 <label for="periodicite" class="control-label col-xs-12 col-sm-2">Périodicité</label>
@@ -477,3 +542,349 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
         </div>
     </div>
 </div>
+    
+    <script>
+        /*
+         * Mise en forme
+         * 
+         */
+    // Datepicher : Date
+    //
+    $(".datepicker").datepicker({
+        format: "dd/mm/yyyy",
+        weekStart: 1,
+        autoclose: true
+    });
+    
+    // Couleur
+    // 
+    function apparence() {
+    var x = document.getElementById("couleur").value;
+    document.getElementById("Apparence").style.backgroundColor= x;
+    }
+    
+    /*
+     *  Validation + Envoi 
+     * 
+     */
+    
+    function doSubmit() {
+
+        if (!saisieOK()) {
+            return false;
+        }
+
+        $("#createEventModal").modal('hide');
+        /*		console.log($('#NoteStartTime').val());   PEUT ETRE SUPPRIMER
+         console.log($('#NoteEndTime').val());
+         console.log($('#NoteAllDay').val());
+         //		alert("form submitted");
+         */
+        var post_data = {};
+
+        post_data['title'] = $('#NoteLibelle').val();
+        post_data['start'] = $('#NoteStartTime').val();
+        post_data['end'] = $('#NoteEndTime').val();
+        post_data['lieu'] = $('#lieu').val();
+        post_data['detail'] = $('#detail').val();
+        post_data['A_date'] = $('#A_date').val();
+        post_data['allDay'] = check_box('allDay');				
+        
+        post_data['participants'] = check_select('zlParticipant');
+        post_data['partage'] = check('optionsPartage');
+        post_data['dispo'] = check('optionsDispo');
+        post_data['color'] = $('#couleur').val();
+
+        post_data['periodicite'] = $('#optionPeriodicite').val();				
+
+        post_data['J_optionsRepetitionJour'] = check('optionsRepetitionJour');	
+        post_data['J_repetitionJours'] = $('#repetitionJours').val();				
+
+        post_data['S_repetionSemaine'] = $('#repetionSemaine').val();			
+        post_data['S_sem_1'] = $('#sem_lundi').val();						
+        post_data['S_sem_2'] = $('#sem_mardi').val();						
+        post_data['S_sem_3'] = $('#sem_mercredi').val();					
+        post_data['S_sem_4'] = $('#sem_jeudi').val();						
+        post_data['S_sem_5'] = $('#sem_vendredi').val();
+        post_data['S_sem_6'] = $('#sem_samedi').val();
+        post_data['S_sem_0'] = $('#sem_dimanche').val();
+
+        post_data['M_repetionMois'] = $('#repetionMois').val();
+        post_data['M_optionsRepetitionMois'] = check('optionsRepetitionMois');		
+        post_data['M_jourDuMois'] = $('#M_jourDuMois').val();					
+        post_data['M_moisCardinalite'] = $('#moisCardinalite').val();			
+        post_data['M_moisCardinaliteJour'] = $('#moisCardinaliteJour').val();	
+
+        post_data['A_optionsRepetitionAn'] = check('optionsRepetitionAn');			
+        post_data['A_jourDuMois'] = $('#A_jourDuMois').val();				
+        post_data['A_Mois'] = $('#A_Mois').val();								
+        post_data['A_anCardinalite'] = $('#anCardinalite').val();
+        post_data['A_anCardinaliteJour'] = $('#anCardinaliteJour').val();
+        post_data['A_anCardinaliteMois'] = $('#anCardinaliteMois').val();
+
+        post_data['RepetitionOccurence'] = check('RepetitionOccurence');
+        post_data['Occurences'] = $('#Occurence').val();
+        post_data['RepetitionDateFin'] = $('#RepetitionDateFin').val();
+
+        post_data['Rappel'] = check('optionsRappel');
+        post_data['tpsRappel'] = $('#tpsRappel').val();
+        post_data['rappel_coef'] = $('#rappel_coef').val();
+
+        post_data['ckEmail'] = $('#ckEmail').val();
+        post_data['ckEmailContact'] = $('#ckEmailContact').val();
+
+        var json = JSON.stringify(post_data);
+
+        $.ajax({
+            type: "POST",
+            url: "add_events.php",
+            //		dataType: "json",
+            data: {
+                note: json,
+                user: '<?php echo $_SESSION['id_user']; ?>'
+            },
+            success: function(response) {
+                var result = $.trim(response);
+                if (result === 'Success') {
+                    alert('ppppp');
+                    $("#calendar").fullCalendar('refetchEvents');
+                }
+            }
+        });
+
+        }
+
+    /*   ---------------------------------------  */
+    function saisieOK() {
+        if (trim($('#NoteLibelle').val()) == "") {
+            window.alert("Le libelle est obligatoire");
+            $('#NoteLibelle').focus();
+            return (false);
+        }
+        if ($('#A_date').val() == "") {
+            window.alert("La date est obligatoire");
+            $('#A_date').focus();
+            return (false);
+        }
+        if (!chk_date_format($('#A_date').val())) {
+            window.alert("La date n'est pas valide ou pas au format jj/mm/aaaa");
+            $('#A_date').focus();
+            return (false);
+        }
+//      if (!end_sup_start($('#NoteStartTime').val(), $('#NoteEndTime').val()) ){
+        if ($('#NoteStartTime').val() > $('#NoteEndTime').val()) {
+            window.alert("L'heure de fin doit être postérieure ou égale à l'heure de début");
+            $('#NoteStartTime').focus();
+            return (false);
+        }
+        if (!check_select('zlParticipant')) {
+            window.alert("Vous devez sélectionner au moins un participant");
+            $('#zlUtilisateur').focus();
+            return (false);
+        }
+
+        return true;
+    }
+
+
+//    $(".datepicker").datepicker({
+//        format: "dd/mm/yyyy",
+//        weekStart: 1,
+//        autoclose: true
+//    });
+
+    // Permet de ne pas afficher l'horaire de la note lorsqu'elle couvre toute la journee
+    function affPlageHoraire(_allDay) {
+        var t1 = document.getElementById('plageHoraire');
+        var t2 = document.getElementById('plageHoraireFull');
+        if (!_allDay) {
+            t2.style.display = "none";
+            t1.style.display = "block";
+        } else {
+            t1.style.display = "none";
+            t2.style.display = "block";
+        }
+    }
+
+// Permet de ne pas afficher les details de chaque choix de la periodicite
+    function affPeriodicite(idDiv) {
+        var periodiciteVisible;
+        if (periodiciteVisible) {
+            periodiciteVisible.style.display = "none";
+        } else {
+            document.getElementById('detailJour').style.display = "none";
+            document.getElementById('detailSemaine').style.display = "none";
+            document.getElementById('detailMois').style.display = "none";
+            document.getElementById('detailAnnee').style.display = "none";
+        }
+        switch (idDiv) {
+            case '2' :
+                periodiciteVisible = document.getElementById('detailJour');
+                break;
+            case '3' :
+                periodiciteVisible = document.getElementById('detailSemaine');
+                break;
+            case '4' :
+                periodiciteVisible = document.getElementById('detailMois');
+                break;
+            case '5' :
+                periodiciteVisible = document.getElementById('detailAnnee');
+                break;
+            default :
+                idDiv = '1';
+                periodiciteVisible = null;
+                break;
+        }
+        if (idDiv != '1') {
+            periodiciteVisible.style.display = "block";
+            // Affichage de la plage de periodicite uniquement lorsque la note n'est pas unique
+            document.getElementById('plagePeriodicite').style.display = "block";
+        } else {
+            document.getElementById('plagePeriodicite').style.display = "none";
+        }
+    }
+
+// Ajuste l'heure de fin en fonction de l'heure de debut et de la duree selectionnees
+    function ajustHeureFin() {
+        var idxHeureFin = document.createAppointmentForm.NoteStartTime.selectedIndex + document.createAppointmentForm.NoteDureeTime.selectedIndex;
+        if (idxHeureFin >= document.createAppointmentForm.NoteEndTime.options.length) {
+            document.createAppointmentForm.NoteEndTime.selectedIndex = document.createAppointmentForm.NoteEndTime.options.length - 1;
+            ajustHeureDuree();
+        } else {
+            document.createAppointmentForm.NoteEndTime.selectedIndex = idxHeureFin;
+        }
+    }
+
+// Ajuste la liste de choix de duree de la note en fonction de l'heure de fin selectionne
+    function ajustHeureDuree() {
+        var idxHeureDuree = document.createAppointmentForm.NoteEndTime.selectedIndex - document.createAppointmentForm.NoteStartTime.selectedIndex;
+        if (idxHeureDuree < 0) {
+            idxHeureDuree = 0;
+            document.createAppointmentForm.NoteEndTime.selectedIndex = document.createAppointmentForm.NoteStartTime.selectedIndex;
+        }
+        document.createAppointmentForm.NoteDureeTime.selectedIndex = Math.min(idxHeureDuree, document.createAppointmentForm.NoteDureeTime.length - 1);
+    }
+
+    /* Fonction de manupulation des listes dans les balises <selec t> */
+    function genereListe(_liste, _tabTexte, _tabValue, _tailleTab) {
+        for (var i = 0; i < _tailleTab; i++)
+            _liste.options[i] = new Option(_tabTexte[i], _tabValue[i]);
+    }
+
+    function bubbleSort(_tabText, _tabValue, _tailleTab) {
+        var i, s;
+
+        do {
+            s = 0;
+            for (i = 1; i < _tailleTab; i++)
+                if (_tabText[i - 1] > _tabText[i]) {
+                    y = _tabText[i - 1];
+                    _tabText[i - 1] = _tabText[i];
+                    _tabText[i] = y;
+                    y = _tabValue[i - 1];
+                    _tabValue[i - 1] = _tabValue[i];
+                    _tabValue[i] = y;
+                    s = 1;
+                }
+        } while (s);
+    }
+
+    function videListe(_liste) {
+        var cpt = _liste.options.length;
+
+        for (var i = 0; i < cpt; i++) {
+            _liste.options[0] = null;
+        }
+    }
+
+    function selectUtil(_listeSource, _listeDest) {
+        var i, j;
+        var ok = false;
+        var tabDestTexte = new Array();
+        var tabDestValue = new Array();
+        var tailleTabDest = 0;
+
+        for (i = 0; i < _listeDest.options.length; i++) {
+            tabDestTexte[tailleTabDest] = _listeDest.options[i].text;
+            tabDestValue[tailleTabDest++] = _listeDest.options[i].value;
+        }
+
+        for (j = _listeSource.options.length - 1; j >= 0; j--) {
+            if (_listeSource.options[j].selected) {
+                ok = true;
+                tabDestTexte[tailleTabDest] = _listeSource.options[j].text;
+                tabDestValue[tailleTabDest++] = _listeSource.options[j].value;
+                _listeSource.options[j] = null;
+            }
+        }
+
+        if (ok) {
+            //Trie du tableau
+            bubbleSort(tabDestTexte, tabDestValue, tailleTabDest);
+            //Vide la liste destination
+            videListe(_listeDest);
+            //Recree la liste
+            genereListe(_listeDest, tabDestTexte, tabDestValue, tailleTabDest);
+        }
+    }
+
+    //Fonction pour selectionner tous les utilisateurs d'une liste source et les transferer dans une liste destination
+    function selectAll(_listeSource, _listeDest) {
+        for (var i = 0; i < _listeSource.options.length; i++) {
+            _listeSource.options[i].selected = true;
+        }
+        selectUtil(_listeSource, _listeDest);
+    }
+
+    function recupSelection(_liste, _champ) {
+        _champ.value = "";
+        for (var i = 0; i < _liste.options.length; i++) {
+            _champ.value += ((i) ? "+" : "") + _liste.options[i].value;
+        }
+    }
+
+
+////	FONCTIONS UTILISEES POUR LA VALIDATION DoSubmit()
+
+// Balises radio : retourne la valeur 'value' du radio checked
+    function check(name) {
+        var inputs = document.getElementsByName(name);
+        var inputsLength = inputs.length;
+
+        for (var i = 0; i < inputsLength; i++) {
+            if (inputs[i].type == 'radio' && inputs[i].checked) {
+                return inputs[i].value;
+                break;
+            }
+        }
+    }
+// Balises checkbox : retourne la valeur true ou false en fonction de checked
+    function check_box(Id) {
+        var inputs = document.getElementById(Id);
+        var checked = 0;
+        if (inputs.checked) {
+            checked = 1;
+        }
+        return checked;
+    }
+
+    // Balises select multiple:
+    // retour: string des options selected séparées par ##
+    function check_select(id) {
+        var inputs = document.getElementById(id);
+        var selecteds = "";
+        if (inputs.nodeName == 'SELECT' && inputs.options.length >= 1) {
+            for (var i = 0, iLen = inputs.options.length; i < iLen; i++) {
+                selecteds = selecteds + '##' + inputs.options.item(i).value;
+                ;
+            }
+        }
+        return selecteds;
+    }
+
+    // Fonction trim javascript (suppression d'espaces avant et apres une chaine)
+    function trim(chaine) {
+        return chaine.replace(/^\s+/, "").replace(/\s+$/, "");
+    }
+
+        </script>

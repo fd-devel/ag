@@ -19,3 +19,11 @@
 td div label {
     margin-right: 5px;
 }
+/* ----- Animation page admin ------- */
+.anim {
+    background-color: red;
+    -webkit-animation-name: example; /* Chrome, Safari, Opera */
+    -webkit-animation-duration: 10s; /* Chrome, Safari, Opera */
+    animation-name: example;
+    animation-duration: 10s;
+}

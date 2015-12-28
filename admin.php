@@ -97,7 +97,7 @@ if(isset($_POST['paramGenAgenda_Go']) && $_POST['paramGenAgenda_Go']==1 ) {
         require './src/Utilisateur_Groupe.extends.class.php';
         if(isset($_POST['GrpSel']) && !empty($_POST['GrpSel'])){
             $groupesSelect = explode('+',$_POST['GrpSel']);
-                $unGroupe = new GroupAndUser();
+            $unGroupe = new GroupAndUser();
             foreach ($groupesSelect as $Gs) {
 //                $unGroupe = new Utilisateur_Groupe();
                 $laListe = $unGroupe->getUtilisateurByGroupe($Gs);
@@ -157,9 +157,9 @@ $checked_nom1 = ($params[3]['Default'] == 0) ? "checked" : "";
 $checked_nom2 = ($params[3]['Default'] == 0) ? "" : "checked";
 
 // Planning par default
-$selected_planning1 = ($params[4]['Default'] == 0) ? "selected" : "";
-$selected_planning2 = ($params[4]['Default'] == 1) ? "selected" : "";
-$selected_planning3 = ($params[4]['Default'] == 2) ? "selected" : "";
+$selected_planning1 = ($params[4]['Default'] == 1) ? "selected" : "";
+$selected_planning2 = ($params[4]['Default'] == 2) ? "selected" : "";
+$selected_planning3 = ($params[4]['Default'] == 3) ? "selected" : "";
 
 // Partage planning
 
