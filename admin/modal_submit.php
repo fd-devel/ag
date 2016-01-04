@@ -29,7 +29,7 @@
 function verifSel(theForm) {
       var _checked = false;
       for (var i=0; i<theForm.elements.length; i++) {
-        if (theForm.elements[i].name.substr(0,3)=="sel")
+        if (theForm.elements[i].name.substr(0,3)==="sel")
           if (theForm.elements[i].checked==true)
             _checked = true;
       }

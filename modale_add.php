@@ -142,6 +142,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . afficheHeure($i, $i) . '<
             array_push($UsersToAffect, $I_d);
         }
     }
+    array_push($UsersToAffect, $consultUser); // Au cas ou il n'y ai pas de groupe
     array_unique($UsersToAffect);
     
 
@@ -540,7 +541,8 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
                 <button type="submit" class="btn btn-primary" id="submitButton">Save</button>
             </div>
         </div>
-    </div>
+        </div>
+        </div>
 </div>
     
     <script>
@@ -646,9 +648,12 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
             success: function(response) {
                 var result = $.trim(response);
                 if (result === 'Success') {
-                    alert('ppppp');
+                    alert('Note créée!');
                     $("#calendar").fullCalendar('refetchEvents');
                 }
+            },
+            error : function(event, jqxhr, settings, thrownError){
+                alert(settings.url);
             }
         });
 
@@ -765,6 +770,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
         document.createAppointmentForm.NoteDureeTime.selectedIndex = Math.min(idxHeureDuree, document.createAppointmentForm.NoteDureeTime.length - 1);
     }
 
+
     /* Fonction de manupulation des listes dans les balises <selec t> */
     function genereListe(_liste, _tabTexte, _tabValue, _tailleTab) {
         for (var i = 0; i < _tailleTab; i++)
@@ -875,7 +881,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
         var selecteds = "";
         if (inputs.nodeName == 'SELECT' && inputs.options.length >= 1) {
             for (var i = 0, iLen = inputs.options.length; i < iLen; i++) {
-                selecteds = selecteds + '##' + inputs.options.item(i).value;
+                selecteds = (selecteds === "") ? selecteds + inputs.options.item(i).value : selecteds + '##' + inputs.options.item(i).value;
                 ;
             }
         }

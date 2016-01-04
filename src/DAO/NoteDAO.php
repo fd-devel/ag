@@ -117,20 +117,18 @@ class NoteDAO extends DAO
     public function insert($noteData) {
 		
 		$columns = $values = "";
+                $data = array();
 		foreach ($noteData as $key => $val)
 		{
 			$columns .= $columns == "" ? $key : ", ".$key;
 			$values	.= $values == "" ? ":".$key : ", :".$key;
+                    $dataKey = ':'.$key;
+                    $data[$dataKey] = $val;
 		}
 				
 		$req = "INSERT agenda_note (".$columns.") values (".$values.")";
 		$stmt = $this->connection->prepare($req);
                 
-                $data = array();
-                foreach ($noteData as $key => $val){
-                    $dataKey = ':'.$key;
-                    $data[$dataKey] = $val;
-                }
         $stmt->execute($data);
     }
     

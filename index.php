@@ -106,7 +106,7 @@ include "../footer.php";
                 $(this).css('border-color', 'red');
 */
             },
-            height : 'auto',
+//            height : 'auto',
             views: {
                 month: { 
                     height : '500px'

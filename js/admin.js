@@ -6,7 +6,7 @@ $(".btn-minimize").click(function(){
   });
 
 // Info Alerte ajout radio
-if(info_alert==1) message("AJOUT RADIO", "Votre radio a bien été ajoutée", "success");
+if(info_alert==1) message("PARAMETRES AGENDA", "Vos paramètres ont bien été enregistrés", "success");
 if(info_alert==2) message("AJOUT RADIO", "Votre radio a bien été ajoutée. Mais il n'y a pas de logo", "warning");
 if(info_alert==3) message("AJOUT RADIO", "Votre radio a bien été ajoutée.<br />Mais pas le logo, le fichier n'est pas une image valide", "warning");
 if(info_alert==4) message("AJOUT RADIO", "Votre radio a bien été ajoutée.<br />Mais pas le logo, le fichier dépasse les 500Ko!", "warning");

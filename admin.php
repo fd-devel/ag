@@ -914,8 +914,8 @@ if($categories){
 // Chargement du footer
 include "../footer.php";
 ?>
-<!-- Javascript -->
-<script src="modeles/admin.js" ></script>
+<!-- Javascript 
+<script src="modeles/admin.js" ></script>-->
 <script src="js/functions.js"></script>
 <script src="js/admin.js"></script>
 
