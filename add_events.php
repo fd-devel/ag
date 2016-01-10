@@ -64,6 +64,7 @@ $participants = explode('##', $note['participants']);
  */
 
 $Tous_les_X_jours = $Toutes_les_X_semaines = $Tous_les_X_mois = 1; // a incrementer en fonction
+$jours_Ouvrables = $jours_dans_semaine = 0;
 
 $noteData['periodicite'] = $note['periodicite'];
 switch ($note['periodicite']){
@@ -75,22 +76,28 @@ switch ($note['periodicite']){
         }else{
             // Tous les jours ouvrables
             $noteData['periode2'] = 2;
-            $Tous_les_X_jours = [1,1,1,1,1,0,0] ;
+            $Tous_les_X_jours = 1 ;
+            $jours_Ouvrables = 1;
         }
         $noteData['periode1'] = $note['J_optionsRepetitionJour'];
         break;
     case 3: // Hebdomadaire
         $noteData['periode1'] = (floor($note['S_repetionSemaine'])>0) ? floor($note['S_repetionSemaine']) : 1 ;
-        $Toutes_les_X_semaines = [$noteData['periode1']];
-        // Creation d'un tableau des jours de la semaine au format PHP ie. du Dimanche(0) au Samedi(6)
-        $aSemaineType = array();
+            $Tous_les_X_jours = 1 ;
+            $Toutes_les_X_semaines = $noteData['periode1'] ;
+        // Creation d'un tableau des jours de la semaine au format "N" PHP 1 (pour Lundi) à 7 (pour Dimanche)
+        $SemaineType = array();
         //Stockage de la semaine type au format PHP qui est utilisee pour creer la note
         $noteData['periode2'] = "";
-        for ($i=0;$i<7;$i++) {
-            $aSemaineType[$i] = (!$i) ? $note['S_sem_0'] + 0 : $note['S_sem_'.$i] + 0;
-            $noteData['periode2'] .= $aSemaineType[$i];
-            array_push($Tous_les_X_jours, $aSemaineType[$i]);
+        
+        for ($i=1;$i<=7;$i++) {
+            if($note['S_sem_'.$i] == 1){
+                $noteData['periode2'] .= $i;    //  pour la sauvegarde
+                array_push($SemaineType, $i);   //  pour la creation
+//                $dernier_jour[$i]=0;            //  pour la creation
+            }
         }
+        $jours_dans_semaine = count($SemaineType);
         break;
     case 4: // Mensuelle
         if( $note['M_optionsRepetitionMois'] == 1){
@@ -159,10 +166,14 @@ switch ($note['periodicite']){
     $id_mere = 0;
     $yep = new Modea\DAO\NoteDAO();
     foreach ($participants as $participant) {
-    $Occurence = 0;
+        $Occurence = 0;
+        $lejour = 0;
+        $dernier_jour = array(0,0,0,0,0,0,0);
     for($i=0; $i<$nbOccurence; $i++){
+        $do = true;
         $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $Date_Note[1], $Date_Note[0]+$Occurence , $Date_Note[2]);
         $hF_time = mktime($End_Note[0], $End_Note[1], $End_Note[2], $Date_Note[1], $Date_Note[0]+$Occurence , $Date_Note[2]);
+        if($hD_time>$hF_time) $hF_time=$hD_time;
         
         if ($dateMax){
             if($hD_time>$dateMax)                break;
@@ -170,15 +181,58 @@ switch ($note['periodicite']){
         $date_start = date("Y-m-d H:i:s",$hD_time);
         $date_end = date("Y-m-d H:i:s",$hF_time);
         
-        $yap = new Modea\Domain\Note($noteData);
-        $yap->setStart($date_start);
-        $yap->setEnd($date_end);
-        $yap->setUser_id($participant);
-        if ($id_mere) $yap->setMere_id ($id_mere);
-        $yep->save($yap);
-        if(!$id_mere) $id_mere = $yap->getId ();
+        if($jours_Ouvrables){
+            if (date("N",$hD_time) >5 ) {
+                $do = false;
+                $i--;
+            }
+        }
         
-        $Occurence += $Tous_les_X_jours;      
+        if ($jours_dans_semaine) {
+            $jour_choisi = false;
+                $lejour = (int)date("N", $hD_time);
+            
+            foreach ($SemaineType as $value) {
+                if( $lejour == $value){
+                    $jour_choisi = true;
+                    break;
+                }
+            }
+            if($jour_choisi){
+                $jour_choisi = false;
+                $ecart = (int)$Toutes_les_X_semaines*7*24*60*60;
+                if($dernier_jour[$lejour] === 0){
+                    $jour_choisi = true;
+                    $dernier_jour[$lejour] = $hD_time;
+                }
+                elseif (($hD_time - $dernier_jour[$lejour]) >= $ecart ) {
+                    $jour_choisi = true;
+                    $dernier_jour[$lejour] = $hD_time;
+                }
+                else {
+                    $jour_choisi = false;
+                }
+            }
+            
+            if(!$jour_choisi){
+                $i--;
+                $do = false;
+            }
+
+        }
+        
+        if ($do) {
+            
+            $yap = new Modea\Domain\Note($noteData);
+            $yap->setStart($date_start);
+            $yap->setEnd($date_end);
+            $yap->setUser_id($participant);
+            if ($id_mere) $yap->setMere_id ($id_mere);
+            $yep->save($yap);
+            if(!$id_mere) $id_mere = $yap->getId ();    
+        } 
+
+            $Occurence += $Tous_les_X_jours; 
         
     }
     }

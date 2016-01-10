@@ -603,13 +603,13 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
         post_data['J_repetitionJours'] = $('#repetitionJours').val();				
 
         post_data['S_repetionSemaine'] = $('#repetionSemaine').val();			
-        post_data['S_sem_1'] = $('#sem_lundi').val();						
-        post_data['S_sem_2'] = $('#sem_mardi').val();						
-        post_data['S_sem_3'] = $('#sem_mercredi').val();					
-        post_data['S_sem_4'] = $('#sem_jeudi').val();						
-        post_data['S_sem_5'] = $('#sem_vendredi').val();
-        post_data['S_sem_6'] = $('#sem_samedi').val();
-        post_data['S_sem_0'] = $('#sem_dimanche').val();
+        post_data['S_sem_1'] = check_box('sem_lundi');						
+        post_data['S_sem_2'] = check_box('sem_mardi');						
+        post_data['S_sem_3'] = check_box('sem_mercredi');					
+        post_data['S_sem_4'] = check_box('sem_jeudi');						
+        post_data['S_sem_5'] = check_box('sem_vendredi');
+        post_data['S_sem_6'] = check_box('sem_samedi');
+        post_data['S_sem_7'] = check_box('sem_dimanche');
 
         post_data['M_repetionMois'] = $('#repetionMois').val();
         post_data['M_optionsRepetitionMois'] = check('optionsRepetitionMois');		
@@ -692,11 +692,6 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
     }
 
 
-//    $(".datepicker").datepicker({
-//        format: "dd/mm/yyyy",
-//        weekStart: 1,
-//        autoclose: true
-//    });
 
     // Permet de ne pas afficher l'horaire de la note lorsqu'elle couvre toute la journee
     function affPlageHoraire(_allDay) {
@@ -711,7 +706,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
         }
     }
 
-// Permet de ne pas afficher les details de chaque choix de la periodicite
+// Permet de ne pas afficher les details de chaque choix de periodicite
     function affPeriodicite(idDiv) {
         var periodiciteVisible;
         if (periodiciteVisible) {
