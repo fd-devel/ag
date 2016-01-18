@@ -54,7 +54,10 @@ include "../footer.php";
             customButtons: {
                 myCustomButton: {
                     text: 'custom!',
-                    click: function() {
+                    id: 'consultusers',
+                    click: function(event, jsEvent, view) {
+                        $this = $(this);
+                        $this.popover({html:true,title:event.title,placement:'top',container:'body'}).popover('show');
                         alert('clicked the custom button!');
                     }
                 }
@@ -95,16 +98,23 @@ include "../footer.php";
             eventRender: function(event, element) {
                 $(element).tooltip({title: event.lieu});             
             },
-            eventClick: function(event, element) {
-                $(element).popover({title: event.title, content:event.lieu});
-/*
-                alert('Event: ' + calEvent.title);
-                alert('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
-                alert('View: ' + view.name);
+            eventClick: function(event, jsEvent, view) {
+                $this = $(this);
+                $this.popover({
+                    html:true,container:'body',
+                    title: '<div class=" panel-heading bg-success">'+event.title+' </div>' , 
+                    content:event.lieu,
+                    placement:'top'
+                    }).popover('show');
+//                $(element).popover({title: event.title});
+//
+//                alert('Event: ' + event.title);
+//                alert('Coordinates: ' + event.lieu);
+//                alert('View: ' + view.name);
 
                 // change the border color just for fun
                 $(this).css('border-color', 'red');
-*/
+
             },
 //            height : 'auto',
             views: {
@@ -140,13 +150,11 @@ include "../footer.php";
                 //  Date
                 A_date=moment(start).format('DD/MM/YYYY');
 
-                var mywhen = starttimeIndex + ' - ' + endtimeIndex;
                 document.getElementById('NoteStartTime').selectedIndex=starttimeIndex;
                 document.getElementById('NoteEndTime').selectedIndex=endtimeIndex;
-                document.getElementById('NoteDureeTime').selectedIndex=dureetimeIndex;
+                document.getElementById('NoteDureeTime').selectedIndex=(endtimeIndex-starttimeIndex);
                 $('#createEventModal #A_date').val(A_date);
                 $('#createEventModal #NoteAllDay').val(allDay);
-                $('#createEventModal #when').text(mywhen);
                 $('#createEventModal').modal('show');
             },
             editable: true,
@@ -175,7 +183,8 @@ include "../footer.php";
                 });
 
             },
-            eventLimit: true, // allow "more" link when too many events
+            eventLimit: true, // nombre limite de notes : 0-9 , true , false
+            eventLimitText: 'de plus',
             eventOverlap: function(stillEvent, movingEvent) {
                 return stillEvent.allDay && movingEvent.allDay;
             },

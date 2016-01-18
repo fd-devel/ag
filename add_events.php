@@ -46,10 +46,10 @@ $noteData['title']      = $note['title'];
 $noteData['lieu']       = !$note['lieu'] == "" ? $note['lieu'] : "";
 $noteData['detail']     = !$note['detail'] == "" ? $note['detail'] : "";
 $noteData['allDay']     = ($note['allDay'] != 1) ? 0 : 1;
-//$noteData['user_id']     = $id_user;
+
 $noteData['creat_id']     = $id_user;
 $noteData['creat_date']     = date("Y-m-d H:i:s");
-//$noteData['user_id']     = $id_user;             $dateCreation = gmdate("Y-m-d H:i:s", time());
+
 $noteData['partage']    = ($note['partage'] != 1) ? 0 : 1;
 $noteData['dispo']      = ($note['dispo'] != 1) ? 0 : 1;
 $noteData['color']      = !$note['color'] == "" ? $note['color'] : '#D925AC' ; //$note['color'];
@@ -64,7 +64,7 @@ $participants = explode('##', $note['participants']);
  */
 
 $Tous_les_X_jours = $Toutes_les_X_semaines = 1; // a incrementer en fonction
-$jours_Ouvrables = $jours_dans_semaine = $jour_du_mois = $Tous_les_X_mois = 0;
+$jours_Ouvrables = $jours_dans_semaine = $jour_du_mois = $Tous_les_X_mois = $Tous_les_ans = 0;
 
 $noteData['periodicite'] = $note['periodicite'];
 switch ($note['periodicite']){
@@ -109,22 +109,33 @@ switch ($note['periodicite']){
             $noteData['periode2'] = $note['M_moisCardinalite'];
             $noteData['periode3'] = $note['M_moisCardinaliteJour'];
         }
-        $noteData['periode4'] = (floor($note['M_repetionMois'])>0) ? floor($note['M_repetionMois']) : 1;
         break;
     case 5: // Annuelle
-        if ($noteData['A_optionsRepetitionAn'] == 1) {
-            $noteData['periode2'] = $note['A_jourDuMois'];
+        if ($note['A_optionsRepetitionAn'] == 1) {
+            $Tous_les_ans = 1;
+            $noteData['periode1'] = 1;
+            $noteData['periode2'] = $note['A_jourDuMois']; 
             $noteData['periode3'] = $note['A_Mois'];
+                $_jourDuMois = $noteData['periode2'];
+                $_Mois = $noteData['periode3'];
+                
         } else {
+            $Tous_les_ans = 2;
             $noteData['A_optionsRepetitionAn'] = 2;
             $noteData['periode2'] = $note['A_anCardinalite'];
             $noteData['periode3'] = $note['A_anCardinaliteJour'];
             $noteData['periode4'] = $note['A_anCardinaliteMois'];
+                $_jourDuMois = $noteData['periode2'];
+                $_Mois = $noteData['periode3'];
         }
-        $noteData['periode1'] = $noteData['A_optionsRepetitionAn'];
         break;
     default : $noteData['periodicite'] = 1;
 }
+
+
+/*
+ * COMBIEN DE FOIS
+ */
     if ($note['RepetitionOccurence'] == 2 && $noteData['periodicite'] > 1) {
 		$nbOccurence = 99;
 		list($P1,$P2,$P3) = explode("/",$note['RepetitionDateFin']);
@@ -142,18 +153,21 @@ switch ($note['periodicite']){
       $dateMax = 0;
     }
 
+/*
+ * RAPPEL
+ */
     if ($note['Rappel'] != 2) {
-      $noteData['Rappel'] = 0;
-      $noteData['rappel_coef'] = 1;
-      $noteData['email'] = 0;
-      $noteData['contact_associe'] = 0;
-    } else {
-      if ($note['email'] != 1) {
+        $noteData['Rappel'] = 0;
+        $noteData['rappel_coef'] = 1;
         $noteData['email'] = 0;
-      }
-      if ($note['contact_associe'] != 1) {
         $noteData['contact_associe'] = 0;
-      }
+    } else {
+        if ($note['email'] != 1) {
+            $noteData['email'] = 0;
+        }
+        if ($note['contact_associe'] != 1) {
+            $noteData['contact_associe'] = 0;
+        }
     }
     $noteData['partage'] = ($note['partage'] != 1) ? 0 : 1;
 //    $noteData['dispo'] = ($note['dispo'] != 1) ? 0 : 1;
@@ -187,7 +201,7 @@ switch ($note['periodicite']){
             }
         }
 
-        if ($jours_dans_semaine) {
+        if($jours_dans_semaine) {
             $jour_choisi = false;
             $lejour = (int)date("N", $hD_time);
 
@@ -217,13 +231,17 @@ switch ($note['periodicite']){
                 $i--;
                 $do = false;
             }
-
         }
 
         if($Tous_les_X_mois){
             if($jour_du_mois){
-                $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $Date_Note[1]+$Occurence, $jour_du_mois , $Date_Note[2]);
-                $hF_time = mktime($End_Note[0], $End_Note[1], $End_Note[2], $Date_Note[1]+$Occurence, $jour_du_mois , $Date_Note[2]);
+                if(checkdate($Date_Note[1]+$Occurence, $jour_du_mois, $Date_Note[2])){
+                    $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $Date_Note[1]+$Occurence, $jour_du_mois , $Date_Note[2]);
+                    $hF_time = mktime($End_Note[0], $End_Note[1], $End_Note[2], $Date_Note[1]+$Occurence, $jour_du_mois , $Date_Note[2]);
+                }  else {
+                    $i--;
+                    $do = false;
+                }
             }
             else {
                 $cardinal = $noteData['periode2'];      // 1er - 2e -
@@ -246,8 +264,9 @@ switch ($note['periodicite']){
                 
                     $ecart = $ecart + 7*($cardinal-1);
                     
-                    $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $Date_Note[1]+$Occurence, 1+$ecart , $Date_Note[2]);
-                    $hF_time = mktime($End_Note[0], $End_Note[1], $End_Note[2], $Date_Note[1]+$Occurence, 1+$ecart , $Date_Note[2]);
+                        $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $Date_Note[1]+$Occurence, 1+$ecart , $Date_Note[2]);
+                        $hF_time = mktime($End_Note[0], $End_Note[1], $End_Note[2], $Date_Note[1]+$Occurence, 1+$ecart , $Date_Note[2]);
+                    
             
                 }
                 else {
@@ -255,6 +274,52 @@ switch ($note['periodicite']){
                     if ($ecart<0) $ecart += 7;
                     $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $Date_Note[1]+$Occurence, $nb_jours_du_mois-$ecart , $Date_Note[2]);
                     $hF_time = mktime($End_Note[0], $End_Note[1], $End_Note[2], $Date_Note[1]+$Occurence, $nb_jours_du_mois-$ecart , $Date_Note[2]);
+                }
+            }
+        }
+        
+        if ($Tous_les_ans){
+        if($Tous_les_ans == 1){
+            if(checkdate($_Mois, $_jourDuMois, $Date_Note[2]+$Occurence)){
+                $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $_Mois, $_jourDuMois, $Date_Note[2]+$Occurence);
+                $hF_time = mktime($End_Note[0], $End_Note[1], $Start_Note[2], $_Mois, $_jourDuMois, $Date_Note[2]+$Occurence);
+            }else {
+                $i--;
+                $do = false;
+            }
+        }
+        else {
+                $cardinal = $noteData['periode2'];      // 1er - 2e -
+                $jour_choisi = $noteData['periode3'];   // Mercredi => 3
+                $mois_choisi = $noteData['periode4'];
+
+                //  1er jour du mois choisi timestamp
+                $premierJour_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $mois_choisi, 1 , $Date_Note[2]+$Occurence);
+                $dernerJour_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $mois_choisi+1, 1 , $Date_Note[2]+$Occurence);
+                
+                //  1er jour du mois est le Xe jour de semaine (lundi = 1)
+                $premierJour = date("N", $premierJour_time);        // 5 
+                $nb_jours_du_mois = date("t", $premierJour_time);    // 31
+                $dernierJour = date("N", $dernerJour_time) - 1;
+
+                if($cardinal<=4){
+                    // Si jour choisi = 7 (dimanche) et premier jour du mois = 2 (mardi)
+                    // date du jour = 7-2=5 => le 5 du mois est un dimanche
+                    $ecart = $jour_choisi - $premierJour ;
+                    if ($ecart<0) $ecart += 7;
+                
+                    $ecart = $ecart + 7*($cardinal-1);
+                    
+                    $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $mois_choisi, 1+$ecart , $Date_Note[2]+$Occurence);
+                    $hF_time = mktime($End_Note[0], $End_Note[1], $End_Note[2], $mois_choisi, 1+$ecart , $Date_Note[2]+$Occurence);
+                    
+                }
+                else {
+                    $ecart = $dernierJour - $jour_choisi ;
+                    if ($ecart<0) $ecart += 7;
+                    $hD_time = mktime($Start_Note[0], $Start_Note[1], $Start_Note[2], $mois_choisi, $nb_jours_du_mois - $ecart , $Date_Note[2]+$Occurence);
+                    $hF_time = mktime($End_Note[0], $End_Note[1], $End_Note[2], $mois_choisi, $nb_jours_du_mois-$ecart , $Date_Note[2]+$Occurence);
+                    
                 }
             }
         }
@@ -273,7 +338,7 @@ switch ($note['periodicite']){
             if(!$id_mere) $id_mere = $yap->getId ();
         }
 
-            $Occurence += $Tous_les_X_jours;
+            $Occurence = $Occurence + $Tous_les_X_jours + $Tous_les_X_mois;
 
     }
     }
