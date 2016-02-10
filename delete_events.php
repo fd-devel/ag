@@ -16,14 +16,12 @@ if(isset($_POST['do']) && $_POST['do'] === "search"){
     }
 }
  else {
-     if(isset($_POST['param']) && isset($_POST['user']) && isset($_POST['note_id']) ){
     
-        /* VALUES */
-        $id=$_POST['note_id'];
-        $user=$_POST['user'];
-        $param = $_POST['param'];   // 4 : Edit - notmere
+/* VALUES */
+$id=$_POST['id_event'];
+$user=$_POST['user'];
  
 
-     } 
+ 
 }
 ?>

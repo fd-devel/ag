@@ -538,7 +538,7 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
             </div>
             <div class="modal-footer">
                 <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="submitButton">Save</button>
+                <button type="submit" class="btn btn-primary" id="submitEventButton">Save</button>
             </div>
         </div>
         </div>
@@ -570,6 +570,14 @@ echo '<option value="' . $i . '" ' . $selected . '>' . $i . '</option>';
      * 
      */
     
+    // function for add event
+    $('#submitEventButton').on('click', function(e) {
+        // We don't want this to act as a link so cancel the link action
+        e.preventDefault();
+
+        doSubmit();
+    });
+
     function doSubmit() {
 
         if (!saisieOK()) {

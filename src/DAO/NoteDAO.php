@@ -42,6 +42,17 @@ class NoteDAO extends DAO
         return $stmt->fetchAll();
     }
 	
+    public function findByMere($id_mere)
+    {
+        $stmt = $this->connection->prepare('
+            SELECT id FROM agenda_note WHERE mere_id=:mere_id
+        ');
+        $stmt->execute(array("mere_id"=>$id_mere));
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        
+        return $stmt->fetchAll();
+    }
+	
     public function findByUser($id)
     {
         $stmt = $this->connection->prepare('
